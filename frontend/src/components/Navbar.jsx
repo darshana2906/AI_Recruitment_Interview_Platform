@@ -1,7 +1,18 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Briefcase, LogOut, Shield, User, FileText, Menu, X, ChevronRight } from 'lucide-react';
+import {
+  Briefcase,
+  LogOut,
+  Shield,
+  User,
+  FileText,
+  Menu,
+  X,
+  ChevronRight,
+  ExternalLink,
+  ArrowRight
+} from 'lucide-react';
 
 export const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -13,6 +24,18 @@ export const Navbar = () => {
     logout();
     setMobileMenuOpen(false);
     navigate('/login', { replace: true });
+  };
+
+  const handleNavClick = (sectionId) => {
+    setMobileMenuOpen(false);
+    if (location.pathname === '/') {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+    }
+    navigate(`/#${sectionId}`);
   };
 
   const getRoleBadge = (role) => {
@@ -61,74 +84,74 @@ export const Navbar = () => {
             </Link>
 
             {/* Desktop Navigation Links */}
-            {isAuthenticated && (
-              <nav className="hidden md:flex items-center space-x-1 pl-4 border-l border-slate-700/60">
-                {user?.role === 'candidate' && (
-                  <Link
-                    to="/candidate"
-                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition ${
-                      location.pathname.startsWith('/candidate')
-                        ? 'bg-white/10 text-white font-semibold'
-                        : 'text-slate-300 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    Candidate Portal
-                  </Link>
-                )}
+            <nav className="hidden lg:flex items-center space-x-1 pl-4 border-l border-slate-700/60 text-xs">
+              <button
+                onClick={() => handleNavClick('top')}
+                className={`px-3 py-1.5 rounded-md font-medium transition cursor-pointer ${
+                  location.pathname === '/' ? 'text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                Home
+              </button>
+              <button
+                onClick={() => handleNavClick('features')}
+                className="px-3 py-1.5 rounded-md font-medium text-slate-300 hover:text-white hover:bg-white/5 transition cursor-pointer"
+              >
+                Features
+              </button>
+              <button
+                onClick={() => handleNavClick('how-it-works')}
+                className="px-3 py-1.5 rounded-md font-medium text-slate-300 hover:text-white hover:bg-white/5 transition cursor-pointer"
+              >
+                How It Works
+              </button>
+              <button
+                onClick={() => handleNavClick('about')}
+                className="px-3 py-1.5 rounded-md font-medium text-slate-300 hover:text-white hover:bg-white/5 transition cursor-pointer"
+              >
+                About
+              </button>
+              <button
+                onClick={() => handleNavClick('contact')}
+                className="px-3 py-1.5 rounded-md font-medium text-slate-300 hover:text-white hover:bg-white/5 transition cursor-pointer"
+              >
+                Contact
+              </button>
 
-                {user?.role === 'admin' && (
-                  <>
+              {/* Direct Workspace link for Authenticated Users */}
+              {isAuthenticated && (
+                <div className="pl-3 border-l border-slate-700/60 flex items-center gap-1.5">
+                  {user?.role === 'candidate' && (
+                    <Link
+                      to="/candidate"
+                      className="px-3 py-1.5 rounded-md font-semibold bg-blue-600/30 text-blue-200 border border-blue-500/40 hover:bg-blue-600/40 transition"
+                    >
+                      Candidate Portal
+                    </Link>
+                  )}
+                  {user?.role === 'admin' && (
                     <Link
                       to="/admin"
-                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition ${
-                        location.pathname === '/admin'
-                          ? 'bg-white/10 text-white font-semibold'
-                          : 'text-slate-300 hover:text-white hover:bg-white/5'
-                      }`}
+                      className="px-3 py-1.5 rounded-md font-semibold bg-blue-600/30 text-blue-200 border border-blue-500/40 hover:bg-blue-600/40 transition"
                     >
                       Admin Dashboard
                     </Link>
-                    <Link
-                      to="/candidate"
-                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition ${
-                        location.pathname.startsWith('/candidate')
-                          ? 'bg-white/10 text-white font-semibold'
-                          : 'text-slate-300 hover:text-white hover:bg-white/5'
-                      }`}
-                    >
-                      Candidate View
-                    </Link>
+                  )}
+                  {user?.role === 'interviewer' && (
                     <Link
                       to="/interviewer"
-                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition ${
-                        location.pathname.startsWith('/interviewer')
-                          ? 'bg-white/10 text-white font-semibold'
-                          : 'text-slate-300 hover:text-white hover:bg-white/5'
-                      }`}
+                      className="px-3 py-1.5 rounded-md font-semibold bg-blue-600/30 text-blue-200 border border-blue-500/40 hover:bg-blue-600/40 transition"
                     >
-                      Interviewer View
+                      Interviewer Portal
                     </Link>
-                  </>
-                )}
-
-                {user?.role === 'interviewer' && (
-                  <Link
-                    to="/interviewer"
-                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition ${
-                      location.pathname.startsWith('/interviewer')
-                        ? 'bg-white/10 text-white font-semibold'
-                        : 'text-slate-300 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    Interviewer Portal
-                  </Link>
-                )}
-              </nav>
-            )}
+                  )}
+                </div>
+              )}
+            </nav>
           </div>
 
-          {/* Desktop Right Section: User & Logout */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* Desktop Right Section: User & Auth Buttons */}
+          <div className="hidden lg:flex items-center gap-3">
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
                 <div className="text-right">
@@ -156,16 +179,17 @@ export const Navbar = () => {
                 </Link>
                 <Link
                   to="/register"
-                  className="px-3.5 py-1.5 text-xs font-semibold text-white bg-[#2563EB] hover:bg-blue-600 rounded-md transition shadow-xs"
+                  className="px-4 py-1.5 text-xs font-semibold text-white bg-[#2563EB] hover:bg-blue-600 rounded-md transition shadow-xs flex items-center gap-1"
                 >
-                  Create Account
+                  <span>Get Started</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             )}
           </div>
 
           {/* Mobile Menu Toggle Button */}
-          <div className="flex md:hidden items-center">
+          <div className="flex lg:hidden items-center">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-md text-slate-300 hover:text-white hover:bg-slate-800 focus:outline-hidden"
@@ -179,59 +203,79 @@ export const Navbar = () => {
 
       {/* Mobile Navigation Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#0D1826] border-b border-slate-800 px-4 pt-3 pb-5 space-y-3">
+        <div className="lg:hidden bg-[#0D1826] border-b border-slate-800 px-4 pt-3 pb-5 space-y-3">
+          {/* Public Navigation Links */}
+          <div className="space-y-1 pb-3 border-b border-slate-800 text-xs">
+            <button
+              onClick={() => handleNavClick('top')}
+              className="w-full text-left px-3 py-2 rounded-md font-medium text-slate-200 hover:bg-slate-800 transition"
+            >
+              Home
+            </button>
+            <button
+              onClick={() => handleNavClick('features')}
+              className="w-full text-left px-3 py-2 rounded-md font-medium text-slate-200 hover:bg-slate-800 transition"
+            >
+              Features
+            </button>
+            <button
+              onClick={() => handleNavClick('how-it-works')}
+              className="w-full text-left px-3 py-2 rounded-md font-medium text-slate-200 hover:bg-slate-800 transition"
+            >
+              How It Works
+            </button>
+            <button
+              onClick={() => handleNavClick('about')}
+              className="w-full text-left px-3 py-2 rounded-md font-medium text-slate-200 hover:bg-slate-800 transition"
+            >
+              About Platform
+            </button>
+            <button
+              onClick={() => handleNavClick('contact')}
+              className="w-full text-left px-3 py-2 rounded-md font-medium text-slate-200 hover:bg-slate-800 transition"
+            >
+              Contact
+            </button>
+          </div>
+
+          {/* User Account / Auth Section */}
           {isAuthenticated ? (
-            <>
-              <div className="pb-3 border-b border-slate-800 flex items-center justify-between">
+            <div className="space-y-2 pt-1 text-xs">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
                 <div>
-                  <div className="text-xs font-semibold text-white">{user?.full_name}</div>
+                  <div className="font-semibold text-white">{user?.full_name}</div>
                   <div className="text-[11px] text-slate-400">{user?.email}</div>
                 </div>
                 {getRoleBadge(user?.role)}
               </div>
 
-              <div className="space-y-1">
+              {/* Direct Workspace Link */}
+              <div className="pt-1">
                 {user?.role === 'candidate' && (
                   <Link
                     to="/candidate"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md text-xs font-medium text-slate-200 hover:bg-slate-800"
+                    className="block px-3 py-2 rounded-md font-semibold text-blue-300 bg-blue-900/30 border border-blue-800"
                   >
-                    Candidate Portal
+                    Go to Candidate Portal
                   </Link>
                 )}
                 {user?.role === 'admin' && (
-                  <>
-                    <Link
-                      to="/admin"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block px-3 py-2 rounded-md text-xs font-medium text-slate-200 hover:bg-slate-800"
-                    >
-                      Admin Dashboard
-                    </Link>
-                    <Link
-                      to="/candidate"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block px-3 py-2 rounded-md text-xs font-medium text-slate-200 hover:bg-slate-800"
-                    >
-                      Candidate View
-                    </Link>
-                    <Link
-                      to="/interviewer"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block px-3 py-2 rounded-md text-xs font-medium text-slate-200 hover:bg-slate-800"
-                    >
-                      Interviewer View
-                    </Link>
-                  </>
+                  <Link
+                    to="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 rounded-md font-semibold text-blue-300 bg-blue-900/30 border border-blue-800"
+                  >
+                    Go to Admin Dashboard
+                  </Link>
                 )}
                 {user?.role === 'interviewer' && (
                   <Link
                     to="/interviewer"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md text-xs font-medium text-slate-200 hover:bg-slate-800"
+                    className="block px-3 py-2 rounded-md font-semibold text-blue-300 bg-blue-900/30 border border-blue-800"
                   >
-                    Interviewer Portal
+                    Go to Interviewer Portal
                   </Link>
                 )}
               </div>
@@ -239,28 +283,28 @@ export const Navbar = () => {
               <div className="pt-2 border-t border-slate-800">
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-3 py-2 rounded-md text-xs font-medium text-rose-400 hover:bg-rose-950/30 flex items-center gap-2 cursor-pointer"
+                  className="w-full text-left px-3 py-2 rounded-md font-medium text-rose-400 hover:bg-rose-950/30 flex items-center gap-2 cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   Sign Out
                 </button>
               </div>
-            </>
+            </div>
           ) : (
             <div className="space-y-2 pt-1">
               <Link
                 to="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-center px-4 py-2 text-xs font-semibold text-slate-200 bg-slate-800 rounded-md"
+                className="block text-center px-4 py-2 text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 rounded-md transition"
               >
                 Sign In
               </Link>
               <Link
                 to="/register"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-center px-4 py-2 text-xs font-semibold text-white bg-[#2563EB] rounded-md"
+                className="block text-center px-4 py-2 text-xs font-semibold text-white bg-[#2563EB] hover:bg-blue-600 rounded-md transition shadow-xs"
               >
-                Create Account
+                Create Account / Get Started
               </Link>
             </div>
           )}
