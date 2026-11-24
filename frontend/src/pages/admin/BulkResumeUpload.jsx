@@ -39,7 +39,7 @@ export const BulkResumeUpload = ({ onBatchComplete }) => {
     });
 
     if (validFiles.length < incoming.length) {
-      setError('Some files were ignored because only .pdf and .docx are supported.');
+      setError('Some files were skipped: Only .pdf and .docx resume formats are supported.');
     }
 
     setSelectedFiles((prev) => [...prev, ...validFiles]);
@@ -75,24 +75,24 @@ export const BulkResumeUpload = ({ onBatchComplete }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-5">
+    <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-4">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-lg bg-blue-50 text-[#2563EB] flex items-center justify-center">
             <Files className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-slate-900">Bulk Resume Upload & AI Parsing Engine</h2>
+            <h2 className="text-sm font-bold text-slate-900">Bulk Resume Ingestion & Parsing Engine</h2>
             <p className="text-xs text-slate-500">
-              Upload multiple resumes simultaneously. Resumes are processed individually with duplicate identification.
+              Upload batches of resumes simultaneously with isolated per-file parsing and duplicate detection.
             </p>
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0" />
+        <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
           <span>{error}</span>
         </div>
       )}
@@ -104,10 +104,10 @@ export const BulkResumeUpload = ({ onBatchComplete }) => {
         onDragOver={handleDrag}
         onDrop={handleDrop}
         onClick={() => document.getElementById('bulk-resume-input')?.click()}
-        className={`border-2 border-dashed rounded-2xl p-6 text-center transition cursor-pointer ${
+        className={`border-2 border-dashed rounded-xl p-6 text-center transition cursor-pointer ${
           dragActive
-            ? 'border-purple-500 bg-purple-50/50'
-            : 'border-slate-300 hover:border-slate-400 bg-slate-50/50'
+            ? 'border-[#2563EB] bg-blue-50/40'
+            : 'border-slate-300 hover:border-slate-400 bg-slate-50/60'
         }`}
       >
         <input
@@ -118,25 +118,25 @@ export const BulkResumeUpload = ({ onBatchComplete }) => {
           onChange={handleFileChange}
           className="hidden"
         />
-        <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mx-auto mb-2">
-          <Upload className="w-6 h-6" />
+        <div className="w-10 h-10 rounded-lg bg-white text-[#2563EB] border border-slate-200 flex items-center justify-center mx-auto mb-2 shadow-xs">
+          <Upload className="w-5 h-5" />
         </div>
-        <div className="text-sm font-semibold text-slate-700">
-          Drop multiple resumes here, or <span className="text-purple-600 underline">browse files</span>
+        <div className="text-xs font-semibold text-slate-800">
+          Drop candidate resumes here, or <span className="text-[#2563EB] underline">browse files</span>
         </div>
-        <p className="text-xs text-slate-400 mt-1">Select 5 or more PDF and DOCX files for batch AI parsing</p>
+        <p className="text-[11px] text-slate-400 mt-1">
+          Supports PDF and DOCX files. Batch upload 5+ resumes for assessment evaluation.
+        </p>
       </div>
 
       {/* Selected Files Queue */}
       {selectedFiles.length > 0 && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-700">
-              Files Queued for Processing ({selectedFiles.length}):
-            </span>
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
+            <span>Queued for Processing ({selectedFiles.length} files):</span>
             <button
               onClick={() => setSelectedFiles([])}
-              className="text-xs text-red-600 hover:underline"
+              className="text-rose-600 hover:underline cursor-pointer"
             >
               Clear Queue
             </button>
@@ -146,18 +146,21 @@ export const BulkResumeUpload = ({ onBatchComplete }) => {
             {selectedFiles.map((f, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
               >
                 <div className="flex items-center gap-2 truncate">
-                  <span className="px-1.5 py-0.5 rounded-md font-mono text-[10px] font-bold uppercase bg-slate-200 text-slate-700">
+                  <span className="px-1.5 py-0.5 rounded font-mono text-[10px] font-bold uppercase bg-slate-200 text-slate-700">
                     {f.name.split('.').pop()}
                   </span>
-                  <span className="truncate font-medium text-slate-800">{f.name}</span>
+                  <span className="truncate font-medium text-slate-800 text-xs">{f.name}</span>
                 </div>
                 <button
                   type="button"
-                  onClick={() => removeFile(i)}
-                  className="text-slate-400 hover:text-red-500 transition ml-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeFile(i);
+                  }}
+                  className="text-slate-400 hover:text-rose-600 transition ml-2 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -169,16 +172,16 @@ export const BulkResumeUpload = ({ onBatchComplete }) => {
             <button
               onClick={handleBulkSubmit}
               disabled={processing}
-              className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-xs cursor-pointer"
+              className="enterprise-btn-primary"
             >
               {processing ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   <span>Processing {selectedFiles.length} Resumes with AI...</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4" />
+                  <Sparkles className="w-3.5 h-3.5 text-blue-200" />
                   <span>Process {selectedFiles.length} Resumes with AI</span>
                 </>
               )}
@@ -189,70 +192,70 @@ export const BulkResumeUpload = ({ onBatchComplete }) => {
 
       {/* Batch Processing Summary & Itemized Table */}
       {batchResult && (
-        <div className="space-y-4 pt-4 border-t border-slate-100">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
-              <div className="text-xs text-slate-500">Total Files</div>
+        <div className="space-y-4 pt-3 border-t border-slate-100">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-center">
+              <div className="text-[11px] text-slate-500 font-medium">Total Uploaded</div>
               <div className="text-xl font-bold text-slate-800 mt-0.5">{batchResult.total_uploaded}</div>
             </div>
-            <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-center">
-              <div className="text-xs text-emerald-700">Processed</div>
+            <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200 text-center">
+              <div className="text-[11px] text-emerald-700 font-medium">Successfully Processed</div>
               <div className="text-xl font-bold text-emerald-800 mt-0.5">{batchResult.successful}</div>
             </div>
-            <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-center">
-              <div className="text-xs text-amber-700">Duplicates</div>
+            <div className="p-3 bg-amber-50 rounded-lg border border-amber-200 text-center">
+              <div className="text-[11px] text-amber-700 font-medium">Duplicates Detected</div>
               <div className="text-xl font-bold text-amber-800 mt-0.5">{batchResult.duplicates}</div>
             </div>
-            <div className="p-3 bg-red-50 rounded-xl border border-red-200 text-center">
-              <div className="text-xs text-red-700">Failed</div>
-              <div className="text-xl font-bold text-red-800 mt-0.5">{batchResult.failed}</div>
+            <div className="p-3 bg-rose-50 rounded-lg border border-rose-200 text-center">
+              <div className="text-[11px] text-rose-700 font-medium">Failed / Corrupted</div>
+              <div className="text-xl font-bold text-rose-800 mt-0.5">{batchResult.failed}</div>
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-slate-200 font-semibold text-slate-600">
+          <div className="overflow-x-auto rounded-lg border border-slate-200">
+            <table className="enterprise-table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-2.5">File</th>
-                  <th className="px-4 py-2.5">Status</th>
-                  <th className="px-4 py-2.5">Candidate Name</th>
-                  <th className="px-4 py-2.5">Extracted Skills</th>
-                  <th className="px-4 py-2.5">Experience</th>
-                  <th className="px-4 py-2.5">Details / Error</th>
+                  <th>File Name</th>
+                  <th>Processing Status</th>
+                  <th>Candidate Name</th>
+                  <th>Extracted Skills</th>
+                  <th>Experience</th>
+                  <th>Status Details</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody>
                 {batchResult.results.map((r, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/50">
-                    <td className="px-4 py-3 font-medium text-slate-800 truncate max-w-[180px]">{r.filename}</td>
-                    <td className="px-4 py-3">
+                  <tr key={idx}>
+                    <td className="font-semibold text-slate-800 truncate max-w-[180px]">{r.filename}</td>
+                    <td>
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full font-semibold text-[11px] ${
+                        className={
                           r.status === 'Completed'
-                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                            ? 'enterprise-badge-success'
                             : r.status === 'Duplicate'
-                            ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                            : 'bg-red-100 text-red-800 border border-red-200'
-                        }`}
+                            ? 'enterprise-badge-warning'
+                            : 'enterprise-badge-danger'
+                        }
                       >
                         {r.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-semibold text-slate-900">{r.candidate_name || '—'}</td>
-                    <td className="px-4 py-3">
+                    <td className="font-bold text-slate-900">{r.candidate_name || '—'}</td>
+                    <td>
                       <div className="flex flex-wrap gap-1 max-w-[200px]">
                         {r.skills?.slice(0, 3).map((s, i) => (
-                          <span key={i} className="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px]">
+                          <span key={i} className="px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded text-[10px]">
                             {s}
                           </span>
                         ))}
                         {r.skills?.length > 3 && (
-                          <span className="text-[10px] text-slate-400">+{r.skills.length - 3}</span>
+                          <span className="text-[10px] text-slate-400 font-semibold">+{r.skills.length - 3}</span>
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{r.experience_years ? `${r.experience_years} yrs` : '—'}</td>
-                    <td className="px-4 py-3 text-slate-500 text-[11px]">
+                    <td className="text-slate-600 font-semibold">{r.experience_years ? `${r.experience_years} yrs` : '—'}</td>
+                    <td className="text-slate-500 text-[11px]">
                       {r.error || (r.is_duplicate ? 'Existing profile updated' : 'Extracted successfully')}
                     </td>
                   </tr>

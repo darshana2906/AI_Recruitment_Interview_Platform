@@ -60,7 +60,7 @@ export const ProfileReview = ({ initialProfile, onSaveSuccess }) => {
 
       const res = await api.put('/candidates/me', payload);
       setProfile(res.data);
-      setMessage({ type: 'success', text: 'Profile changes saved successfully!' });
+      setMessage({ type: 'success', text: 'Candidate profile changes saved successfully.' });
       if (onSaveSuccess) onSaveSuccess(res.data);
     } catch (err) {
       setMessage({
@@ -73,153 +73,157 @@ export const ProfileReview = ({ initialProfile, onSaveSuccess }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+    <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
         <div>
-          <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+          <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-[#16A34A]" />
             Review & Edit Extracted Candidate Profile
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Verify AI-extracted details below. You can correct any field before applying to jobs.
+            Verify AI-extracted details below. You can correct any field before applying to job positions.
           </p>
         </div>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer self-start sm:self-auto"
+          className="enterprise-btn-primary self-start sm:self-auto"
         >
           {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-          <span>Save Changes</span>
+          <span>Save Profile Changes</span>
         </button>
       </div>
 
       {message && (
         <div
-          className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
+          className={`p-3 rounded-lg text-xs flex items-center gap-2 ${
             message.type === 'success'
               ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
               : 'bg-red-50 text-red-800 border border-red-200'
           }`}
         >
-          {message.type === 'success' ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+          {message.type === 'success' ? (
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+          ) : (
+            <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+          )}
           <span>{message.text}</span>
         </div>
       )}
 
       {/* Basic Demographics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
         <div>
-          <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+          <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
             Full Name
           </label>
           <div className="relative">
-            <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <User className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
               value={profile.full_name || ''}
               onChange={(e) => handleInputChange('full_name', e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-[#2563EB]"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+          <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
             Email Address
           </label>
           <div className="relative">
-            <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="email"
               value={profile.email || ''}
               onChange={(e) => handleInputChange('email', e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-[#2563EB]"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+          <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
             Phone Number
           </label>
           <div className="relative">
-            <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
               value={profile.phone || ''}
               onChange={(e) => handleInputChange('phone', e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-[#2563EB]"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+          <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
             Location
           </label>
           <div className="relative">
-            <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
               value={profile.location || ''}
               onChange={(e) => handleInputChange('location', e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-[#2563EB]"
             />
           </div>
         </div>
       </div>
 
       {/* Experience & Education Attributes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
         <div>
-          <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+          <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
             Total Experience (Years)
           </label>
           <div className="relative">
-            <Briefcase className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <Briefcase className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="number"
               step="0.1"
               value={profile.total_experience_years || 0}
               onChange={(e) => handleInputChange('total_experience_years', e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-[#2563EB]"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+          <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
             Highest Education Qualification
           </label>
           <div className="relative">
-            <GraduationCap className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <GraduationCap className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
               value={profile.education_level || ''}
               onChange={(e) => handleInputChange('education_level', e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-[#2563EB]"
             />
           </div>
         </div>
       </div>
 
       {/* Skills Management */}
-      <div>
-        <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-          <Code2 className="w-4 h-4 text-blue-600" /> Extracted Skills
+      <div className="space-y-2">
+        <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+          <Code2 className="w-3.5 h-3.5 text-[#2563EB]" /> Verified Skills ({profile.skills?.length || 0})
         </label>
-        <div className="flex flex-wrap gap-1.5 mb-3">
+        <div className="flex flex-wrap gap-1">
           {profile.skills?.map((skill, idx) => (
             <span
               key={idx}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200"
             >
               <span>{skill}</span>
               <button
                 type="button"
                 onClick={() => handleRemoveSkill(skill)}
-                className="hover:text-red-600 transition"
+                className="hover:text-rose-600 transition cursor-pointer"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -227,17 +231,17 @@ export const ProfileReview = ({ initialProfile, onSaveSuccess }) => {
           ))}
         </div>
 
-        <form onSubmit={handleAddSkill} className="flex gap-2 max-w-sm">
+        <form onSubmit={handleAddSkill} className="flex gap-2 max-w-sm pt-1">
           <input
             type="text"
             placeholder="Add a new skill (e.g. PyTorch)..."
             value={newSkill}
             onChange={(e) => setNewSkill(e.target.value)}
-            className="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-[#2563EB]"
           />
           <button
             type="submit"
-            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-medium transition flex items-center gap-1"
+            className="enterprise-btn-secondary"
           >
             <Plus className="w-3.5 h-3.5" /> Add
           </button>
@@ -246,14 +250,14 @@ export const ProfileReview = ({ initialProfile, onSaveSuccess }) => {
 
       {/* Profile Summary */}
       <div>
-        <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
-          Professional Summary
+        <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
+          Professional Profile Summary
         </label>
         <textarea
           rows={3}
           value={profile.profile_summary || ''}
           onChange={(e) => handleInputChange('profile_summary', e.target.value)}
-          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-[#2563EB] leading-relaxed"
         />
       </div>
     </div>

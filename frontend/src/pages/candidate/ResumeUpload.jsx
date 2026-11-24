@@ -37,7 +37,7 @@ export const ResumeUpload = ({ onUploadSuccess }) => {
     setError('');
     const ext = selectedFile.name.split('.').pop().toLowerCase();
     if (ext !== 'pdf' && ext !== 'docx') {
-      setError('Invalid file type. Please upload a PDF or DOCX file.');
+      setError('Invalid file format. Please upload a PDF or DOCX resume document.');
       return;
     }
     if (selectedFile.size > 10 * 1024 * 1024) {
@@ -71,21 +71,23 @@ export const ResumeUpload = ({ onUploadSuccess }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
+    <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-lg bg-blue-50 text-[#2563EB] flex items-center justify-center">
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-slate-900">AI Resume Parser</h2>
-            <p className="text-xs text-slate-500">Upload your PDF or DOCX resume for automated information extraction</p>
+            <h2 className="text-sm font-bold text-slate-900">AI-Powered Resume Parser</h2>
+            <p className="text-xs text-slate-500">
+              Upload your PDF or DOCX resume for automated entity extraction and candidate profile generation.
+            </p>
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs flex items-start gap-2">
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs flex items-start gap-2">
           <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>
@@ -97,10 +99,10 @@ export const ResumeUpload = ({ onUploadSuccess }) => {
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        className={`border-2 border-dashed rounded-2xl p-6 text-center transition cursor-pointer ${
+        className={`border-2 border-dashed rounded-xl p-6 text-center transition cursor-pointer ${
           dragActive
-            ? 'border-blue-500 bg-blue-50/50'
-            : 'border-slate-300 hover:border-slate-400 bg-slate-50/50'
+            ? 'border-[#2563EB] bg-blue-50/40'
+            : 'border-slate-300 hover:border-slate-400 bg-slate-50/60'
         }`}
         onClick={() => document.getElementById('single-resume-input')?.click()}
       >
@@ -114,12 +116,12 @@ export const ResumeUpload = ({ onUploadSuccess }) => {
 
         {file ? (
           <div className="flex items-center justify-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs uppercase">
+            <div className="w-9 h-9 rounded-lg bg-blue-100 text-[#1E40AF] flex items-center justify-center font-bold text-xs uppercase">
               {file.name.split('.').pop()}
             </div>
             <div className="text-left">
-              <div className="font-semibold text-sm text-slate-800">{file.name}</div>
-              <div className="text-xs text-slate-500">{(file.size / 1024).toFixed(1)} KB</div>
+              <div className="font-semibold text-xs text-slate-800">{file.name}</div>
+              <div className="text-[11px] text-slate-500">{(file.size / 1024).toFixed(1)} KB</div>
             </div>
             <button
               type="button"
@@ -127,20 +129,20 @@ export const ResumeUpload = ({ onUploadSuccess }) => {
                 e.stopPropagation();
                 setFile(null);
               }}
-              className="p-1 text-slate-400 hover:text-red-500 rounded-md transition"
+              className="p-1 text-slate-400 hover:text-rose-600 rounded-md transition cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
         ) : (
-          <div className="space-y-2">
-            <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
-              <Upload className="w-6 h-6" />
+          <div className="space-y-1.5">
+            <div className="w-10 h-10 rounded-lg bg-white text-[#2563EB] border border-slate-200 flex items-center justify-center mx-auto shadow-xs">
+              <Upload className="w-5 h-5" />
             </div>
-            <div className="text-sm font-semibold text-slate-700">
-              Drag & Drop your resume here, or <span className="text-blue-600 underline">browse</span>
+            <div className="text-xs font-semibold text-slate-800">
+              Drag & drop your resume here, or <span className="text-[#2563EB] underline">browse files</span>
             </div>
-            <p className="text-xs text-slate-400">Supported formats: PDF (.pdf), Microsoft Word (.docx) up to 10 MB</p>
+            <p className="text-[11px] text-slate-400">Supported formats: PDF (.pdf) and Word (.docx) up to 10 MB</p>
           </div>
         )}
       </div>
@@ -150,14 +152,14 @@ export const ResumeUpload = ({ onUploadSuccess }) => {
           <button
             onClick={() => setFile(null)}
             disabled={uploading}
-            className="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-semibold transition"
+            className="enterprise-btn-secondary"
           >
             Cancel
           </button>
           <button
             onClick={handleUpload}
             disabled={uploading}
-            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-xs cursor-pointer"
+            className="enterprise-btn-primary"
           >
             {uploading ? (
               <>
@@ -166,7 +168,7 @@ export const ResumeUpload = ({ onUploadSuccess }) => {
               </>
             ) : (
               <>
-                <Sparkles className="w-3.5 h-3.5" />
+                <Sparkles className="w-3.5 h-3.5 text-blue-200" />
                 <span>Process Resume with AI</span>
               </>
             )}

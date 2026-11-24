@@ -32,7 +32,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+        <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
           <Navbar />
           <main className="flex-1">
             <Routes>

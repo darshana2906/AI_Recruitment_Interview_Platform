@@ -7,15 +7,15 @@ import {
   FileText,
   ShieldCheck,
   ShieldAlert,
-  CheckCircle,
+  CheckCircle2,
   Clock,
-  Upload,
-  Search,
   Briefcase,
   MapPin,
   Sparkles,
-  CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Building,
+  Layers,
+  ChevronRight
 } from 'lucide-react';
 
 export const CandidateHome = () => {
@@ -60,7 +60,7 @@ export const CandidateHome = () => {
 
   const handleApply = async (jobId) => {
     if (!profile) {
-      setApplyMessage({ error: 'Please upload and review your resume before applying!' });
+      setApplyMessage({ error: 'Please upload and review your resume before applying for positions.' });
       return;
     }
     setApplyingJobId(jobId);
@@ -103,36 +103,43 @@ export const CandidateHome = () => {
   const appliedJobIds = new Set(myApplications.map((a) => a.job_id));
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-6 text-white shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      {/* Candidate Executive Banner */}
+      <div className="bg-[#14243A] rounded-xl p-6 text-white shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border border-slate-800">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/30 text-emerald-100 border border-emerald-400/40 mb-2">
-            <FileText className="w-3.5 h-3.5" /> Candidate Portal
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-white/10 text-slate-200 border border-white/15 mb-2">
+            <FileText className="w-3.5 h-3.5 text-blue-400" /> Candidate Talent Portal
           </div>
-          <h1 className="text-2xl font-bold">Welcome, {user?.full_name}!</h1>
-          <p className="text-emerald-100 text-sm mt-1">
-            Authenticated via JWT as <span className="font-semibold">{user?.email}</span> (Role: <span className="font-semibold uppercase tracking-wider">{user?.role}</span>).
+          <h1 className="text-xl font-bold text-white tracking-tight">Welcome, {user?.full_name}!</h1>
+          <p className="text-slate-300 text-xs mt-0.5">
+            Signed in as <span className="font-semibold text-white">{user?.email}</span> (Candidate Role).
           </p>
         </div>
-        <div className="bg-white/10 backdrop-blur-xs px-4 py-3 rounded-xl border border-white/20 text-xs">
-          <div className="text-emerald-200">Resume Status</div>
-          <div className="font-semibold text-white flex items-center gap-1.5 mt-0.5">
-            <span className={`w-2 h-2 rounded-full ${profile ? 'bg-emerald-300' : 'bg-amber-300 animate-pulse'}`}></span>
-            {profile ? 'Parsed & Verified' : 'Resume Required'}
+
+        <div className="flex items-center gap-3">
+          <div className="bg-slate-900/60 px-3.5 py-2 rounded-lg border border-slate-700 text-xs">
+            <div className="text-[10px] text-slate-400 font-medium">Resume Status</div>
+            <div className="font-semibold text-white flex items-center gap-1.5 mt-0.5">
+              <span className={`w-2 h-2 rounded-full ${profile ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`}></span>
+              {profile ? 'Verified & Indexed' : 'Resume Required'}
+            </div>
+          </div>
+          <div className="bg-slate-900/60 px-3.5 py-2 rounded-lg border border-slate-700 text-xs">
+            <div className="text-[10px] text-slate-400 font-medium">Active Applications</div>
+            <div className="font-bold text-white mt-0.5">{myApplications.length} Positions</div>
           </div>
         </div>
       </div>
 
       {/* Notifications */}
       {applyMessage?.success && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2">
+        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-lg flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>{applyMessage.success}</span>
         </div>
       )}
       {applyMessage?.error && (
-        <div className="p-3.5 bg-red-50 border border-red-200 text-red-800 text-xs rounded-xl flex items-center gap-2">
+        <div className="p-3 bg-red-50 border border-red-200 text-red-800 text-xs rounded-lg flex items-center gap-2">
           <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
           <span>{applyMessage.error}</span>
         </div>
@@ -145,7 +152,7 @@ export const CandidateHome = () => {
         }}
       />
 
-      {/* Profile Review and Correction Module (Requirement A) */}
+      {/* Profile Review and Correction Module */}
       {profile && (
         <ProfileReview
           initialProfile={profile}
@@ -153,14 +160,48 @@ export const CandidateHome = () => {
         />
       )}
 
+      {/* My Applications Tracking Pipeline */}
+      {myApplications.length > 0 && (
+        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-3">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-[#2563EB]" />
+            <h2 className="text-sm font-bold text-slate-900">Application Pipeline ({myApplications.length})</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {myApplications.map((app) => (
+              <div
+                key={app.id}
+                className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-2 text-xs"
+              >
+                <div className="flex justify-between items-start gap-2">
+                  <span className="font-bold text-slate-900">{app.job_title}</span>
+                  <span
+                    className={
+                      app.status === 'Shortlisted'
+                        ? 'enterprise-badge-success'
+                        : 'enterprise-badge-info'
+                    }
+                  >
+                    {app.status}
+                  </span>
+                </div>
+                <div className="text-[11px] text-slate-500">
+                  <span>Location: {app.job_location}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Open Positions & Application Section */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
+      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Briefcase className="w-5 h-5 text-indigo-600" />
+            <Briefcase className="w-4 h-4 text-[#2563EB]" />
             <div>
-              <h2 className="text-base font-bold text-slate-900">Explore Open Job Requisitions ({availableJobs.length})</h2>
-              <p className="text-xs text-slate-500">Apply directly using your parsed resume profile</p>
+              <h2 className="text-sm font-bold text-slate-900">Open Job Requisitions ({availableJobs.length})</h2>
+              <p className="text-xs text-slate-500">Apply directly using your parsed candidate profile</p>
             </div>
           </div>
         </div>
@@ -178,12 +219,12 @@ export const CandidateHome = () => {
               return (
                 <div
                   key={job.id}
-                  className="p-5 bg-slate-50 border border-slate-200 rounded-2xl space-y-3 flex flex-col justify-between hover:border-indigo-300 transition"
+                  className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 flex flex-col justify-between hover:border-slate-300 transition"
                 >
                   <div className="space-y-2">
                     <div className="flex justify-between items-start gap-2">
-                      <h3 className="font-bold text-slate-900 text-sm leading-snug">{job.title}</h3>
-                      <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md text-[10px] font-bold">
+                      <h3 className="font-bold text-slate-900 text-xs leading-snug">{job.title}</h3>
+                      <span className="px-2 py-0.5 bg-white text-slate-700 border border-slate-200 rounded text-[10px] font-semibold">
                         {job.employment_type}
                       </span>
                     </div>
@@ -206,7 +247,7 @@ export const CandidateHome = () => {
                       {job.required_skills?.slice(0, 4).map((s, idx) => (
                         <span
                           key={idx}
-                          className="px-2 py-0.5 bg-white text-indigo-700 border border-indigo-200 rounded-md text-[10px] font-medium"
+                          className="px-2 py-0.5 bg-white text-slate-700 border border-slate-200 rounded text-[10px] font-medium"
                         >
                           {s}
                         </span>
@@ -216,17 +257,17 @@ export const CandidateHome = () => {
 
                   <div className="pt-2 border-t border-slate-200">
                     {isApplied ? (
-                      <div className="w-full py-1.5 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-xl text-center flex items-center justify-center gap-1">
+                      <div className="w-full py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold rounded-lg text-center flex items-center justify-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        Applied
+                        Application Submitted
                       </div>
                     ) : (
                       <button
                         onClick={() => handleApply(job.id)}
                         disabled={isApplying || !profile}
-                        className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-xs font-semibold rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="w-full enterprise-btn-primary"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                        <Sparkles className="w-3.5 h-3.5 text-blue-200" />
                         {isApplying ? 'Submitting...' : 'Apply with Profile'}
                       </button>
                     )}
@@ -239,54 +280,53 @@ export const CandidateHome = () => {
       </div>
 
       {/* RBAC Verification Live Playground */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
-        <div className="flex items-center gap-2 mb-2">
-          <ShieldCheck className="w-5 h-5 text-blue-600" />
-          <h2 className="text-lg font-bold text-slate-900">Role-Based Access Control (RBAC) Verification</h2>
+      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-3">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-[#2563EB]" />
+          <h2 className="text-sm font-bold text-slate-900">RBAC Security Verification</h2>
         </div>
-        <p className="text-sm text-slate-500 mb-4">
-          Test real-time backend API authorization directly from this interface to verify role permissions and access security.
+        <p className="text-xs text-slate-500">
+          Verify candidate role authorization: Confirm access to candidate endpoints and verify that administrative APIs are forbidden (HTTP 403).
         </p>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2 pt-1">
           <button
             onClick={() => testEndpoint('/users/profile', 'GET /api/users/profile')}
             disabled={testing}
-            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-semibold transition border border-slate-300 flex items-center gap-1.5 cursor-pointer"
+            className="enterprise-btn-secondary"
           >
-            <span>Test Candidate Profile (200 OK)</span>
+            <span>Candidate Profile (200 OK)</span>
           </button>
           <button
             onClick={() => testEndpoint('/candidates/me', 'GET /api/candidates/me')}
             disabled={testing}
-            className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-xl text-xs font-semibold transition border border-emerald-200 flex items-center gap-1.5 cursor-pointer"
+            className="enterprise-btn-secondary"
           >
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Test Candidate Extracted Data (200 OK)</span>
+            <span>Extracted Data (200 OK)</span>
           </button>
           <button
-            onClick={() => testEndpoint('/users/admin-only', 'GET /api/users/admin-only (Attempt Forbidden)')}
+            onClick={() => testEndpoint('/users/admin-only', 'GET /api/users/admin-only')}
             disabled={testing}
-            className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-800 rounded-xl text-xs font-semibold transition border border-red-200 flex items-center gap-1.5 cursor-pointer"
+            className="enterprise-btn-secondary text-rose-700 border-rose-200 hover:bg-rose-50"
           >
-            <ShieldAlert className="w-3.5 h-3.5 text-red-600" />
-            <span>Test Admin-Only API (Expect 403 Forbidden)</span>
+            <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
+            <span>Admin-Only Endpoint (Expect 403)</span>
           </button>
         </div>
 
-        {/* Test Result Display */}
         {testResult && (
           <div
-            className={`mt-4 p-4 rounded-xl border text-xs font-mono transition ${
+            className={`mt-3 p-3 rounded-lg border text-xs font-mono transition ${
               testResult.success
                 ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
                 : 'bg-red-50 border-red-200 text-red-900'
             }`}
           >
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center justify-between mb-1">
               <span className="font-bold">{testResult.endpoint}</span>
               <span
-                className={`px-2 py-0.5 rounded-full font-bold ${
+                className={`px-2 py-0.5 rounded font-bold ${
                   testResult.status === 200
                     ? 'bg-emerald-200 text-emerald-900'
                     : testResult.status === 403
@@ -294,7 +334,7 @@ export const CandidateHome = () => {
                     : 'bg-red-200 text-red-900'
                 }`}
               >
-                HTTP {testResult.status} {testResult.status === 403 ? 'FORBIDDEN (RBAC WORKING)' : ''}
+                HTTP {testResult.status} {testResult.status === 403 ? 'FORBIDDEN (RBAC PASS)' : ''}
               </span>
             </div>
             <pre className="overflow-x-auto whitespace-pre-wrap">

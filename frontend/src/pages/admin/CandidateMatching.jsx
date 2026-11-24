@@ -11,14 +11,11 @@ import {
   UserCheck,
   Edit3,
   FileText,
-  Star,
   Search,
-  Sliders,
-  Filter,
   Eye,
-  ArrowRight,
-  ShieldAlert,
-  MessageSquare
+  MessageSquare,
+  X,
+  SlidersHorizontal
 } from 'lucide-react';
 
 export const CandidateMatching = ({ initialJobId = null }) => {
@@ -84,7 +81,6 @@ export const CandidateMatching = ({ initialJobId = null }) => {
     try {
       const res = await api.post(`/applications/${applicationId}/shortlist`);
       setSuccess('Candidate shortlisted successfully!');
-      // Update local state
       if (matchingData) {
         setMatchingData({
           ...matchingData,
@@ -114,13 +110,12 @@ export const CandidateMatching = ({ initialJobId = null }) => {
     if (!overrideModal.item?.application_id) return;
 
     try {
-      const res = await api.post(`/applications/${overrideModal.item.application_id}/override`, {
+      await api.post(`/applications/${overrideModal.item.application_id}/override`, {
         override_score: parseFloat(overrideModal.score),
         override_reason: overrideModal.reason
       });
 
       setSuccess('Human-in-the-loop score override saved.');
-      // Refresh matching
       runMatching(selectedJobId);
       setOverrideModal({ isOpen: false, item: null, score: '', reason: '' });
       setTimeout(() => setSuccess(null), 3000);
@@ -147,7 +142,6 @@ export const CandidateMatching = ({ initialJobId = null }) => {
       });
 
       setSuccess('Internal recruiter note updated.');
-      // Update local
       if (matchingData) {
         setMatchingData({
           ...matchingData,
@@ -193,79 +187,76 @@ export const CandidateMatching = ({ initialJobId = null }) => {
     return matchesScore && matchesQuery;
   });
 
-  const getScoreBadgeColor = (score) => {
-    if (score >= 75) return 'bg-emerald-50 text-emerald-700 border-emerald-300 ring-emerald-500/20';
-    if (score >= 60) return 'bg-blue-50 text-blue-700 border-blue-300 ring-blue-500/20';
-    if (score >= 40) return 'bg-amber-50 text-amber-700 border-amber-300 ring-amber-500/20';
-    return 'bg-slate-100 text-slate-700 border-slate-300 ring-slate-500/20';
+  const getScoreBadgeStyle = (score) => {
+    if (score >= 75) return 'bg-[#F0FDF4] text-[#166534] border-[#BBF7D0]';
+    if (score >= 60) return 'bg-[#EFF6FF] text-[#1E40AF] border-[#BFDBFE]';
+    if (score >= 40) return 'bg-[#FFFBEB] text-[#92400E] border-[#FDE68A]';
+    return 'bg-[#F8FAFC] text-slate-700 border-slate-300';
   };
 
   const activeJob = jobs.find((j) => j.id === parseInt(selectedJobId));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Top Controller Bar */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <Sparkles className="w-6 h-6 text-indigo-600" />
-              <h2 className="text-xl font-bold text-slate-900">AI-Powered Candidate Matching</h2>
+              <Sparkles className="w-5 h-5 text-[#2563EB]" />
+              <h2 className="text-base font-bold text-slate-900">AI-Powered Candidate Matching</h2>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
-              Deterministic 5-factor hybrid candidate matching algorithm: Technical Skills (35%), Experience (25%), Education (15%), Preferred Skills (5%), Semantic Similarity (20%).
+            <p className="text-xs text-slate-500 mt-0.5">
+              5-Factor Hybrid Algorithm: Technical (35%), Experience (25%), Education (15%), Preferred (5%), Semantic Similarity (20%).
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-            {/* Job Selector */}
-            <div className="flex-1 md:w-72">
-              <select
-                value={selectedJobId}
-                onChange={(e) => {
-                  setSelectedJobId(e.target.value);
-                  setMatchingData(null);
-                }}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-              >
-                {jobs.map((job) => (
-                  <option key={job.id} value={job.id}>
-                    {job.title} ({job.location})
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+            <select
+              value={selectedJobId}
+              onChange={(e) => {
+                setSelectedJobId(e.target.value);
+                setMatchingData(null);
+              }}
+              className="px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-[#2563EB] flex-1 md:w-64"
+            >
+              {jobs.map((job) => (
+                <option key={job.id} value={job.id}>
+                  {job.title} ({job.location})
+                </option>
+              ))}
+            </select>
 
             <button
               onClick={() => runMatching()}
               disabled={loading || !selectedJobId}
-              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white text-xs font-semibold rounded-xl shadow-xs flex items-center justify-center gap-2 transition cursor-pointer shrink-0"
+              className="enterprise-btn-primary shrink-0"
             >
-              <Sparkles className={`w-4 h-4 ${loading ? 'animate-spin' : 'text-amber-300'}`} />
-              {loading ? 'Evaluating Candidates...' : 'Run Matching Algorithm'}
+              <Sparkles className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : 'text-blue-200'}`} />
+              <span>{loading ? 'Evaluating...' : 'Run Matching Engine'}</span>
             </button>
           </div>
         </div>
 
         {/* Selected Job Requirements Summary */}
         {activeJob && (
-          <div className="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 flex flex-wrap items-center justify-between gap-4 text-xs">
-            <div className="space-y-1">
-              <span className="font-bold text-indigo-950 text-sm">{activeJob.title}</span>
-              <div className="flex flex-wrap gap-2 text-[11px] text-slate-600">
-                <span>Min Experience: <strong className="text-slate-900">{activeJob.min_experience} yrs</strong></span>
+          <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="space-y-0.5">
+              <span className="font-bold text-slate-900 text-xs">{activeJob.title}</span>
+              <div className="flex flex-wrap gap-2 text-[11px] text-slate-500">
+                <span>Min Experience: <strong className="text-slate-800">{activeJob.min_experience} yrs</strong></span>
                 <span>•</span>
-                <span>Education: <strong className="text-slate-900">{activeJob.education_requirement}</strong></span>
+                <span>Education: <strong className="text-slate-800">{activeJob.education_requirement}</strong></span>
                 <span>•</span>
-                <span>Location: <strong className="text-slate-900">{activeJob.location}</strong></span>
+                <span>Location: <strong className="text-slate-800">{activeJob.location}</strong></span>
               </div>
             </div>
             <div className="flex flex-wrap gap-1 items-center">
-              <span className="text-[11px] font-semibold text-slate-500 mr-1">Required:</span>
+              <span className="text-[10px] font-semibold text-slate-400 mr-1 uppercase">Required:</span>
               {activeJob.required_skills?.map((s, idx) => (
                 <span
                   key={idx}
-                  className="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-md font-medium text-[10px]"
+                  className="px-2 py-0.5 bg-white text-slate-700 border border-slate-200 rounded text-[10px] font-medium"
                 >
                   {s}
                 </span>
@@ -277,13 +268,13 @@ export const CandidateMatching = ({ initialJobId = null }) => {
 
       {/* Notifications */}
       {success && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2">
+        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-lg flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>{success}</span>
         </div>
       )}
       {error && (
-        <div className="p-3.5 bg-red-50 border border-red-200 text-red-800 text-xs rounded-xl flex items-center gap-2">
+        <div className="p-3 bg-red-50 border border-red-200 text-red-800 text-xs rounded-lg flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
           <span>{error}</span>
         </div>
@@ -293,16 +284,15 @@ export const CandidateMatching = ({ initialJobId = null }) => {
       {matchingData && (
         <div className="space-y-4">
           {/* Results Filters & Summary Bar */}
-          <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+          <div className="bg-white rounded-xl p-3.5 border border-slate-200 shadow-xs flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2">
-              <UserCheck className="w-4 h-4 text-indigo-600" />
+              <UserCheck className="w-4 h-4 text-[#2563EB]" />
               <span className="font-bold text-slate-800">
                 Ranked Candidates: {filteredMatches.length} of {matchingData.total_candidates_evaluated} Evaluated
               </span>
             </div>
 
-            <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
-              {/* Score Slider */}
+            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
               <div className="flex items-center gap-2">
                 <span className="text-slate-500 text-[11px] whitespace-nowrap">
                   Min Score: <strong>{minScoreFilter}%</strong>
@@ -314,19 +304,18 @@ export const CandidateMatching = ({ initialJobId = null }) => {
                   step="5"
                   value={minScoreFilter}
                   onChange={(e) => setMinScoreFilter(parseInt(e.target.value))}
-                  className="w-24 accent-indigo-600 cursor-pointer"
+                  className="w-24 accent-[#2563EB] cursor-pointer"
                 />
               </div>
 
-              {/* Text Search */}
-              <div className="relative flex-1 md:w-60">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+              <div className="relative flex-1 md:w-56">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2" />
                 <input
                   type="text"
-                  placeholder="Filter by name or skill..."
+                  placeholder="Filter candidate or skill..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                  className="w-full pl-8 pr-3 py-1 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-800 focus:outline-hidden focus:ring-1 focus:ring-[#2563EB]"
                 />
               </div>
             </div>
@@ -334,21 +323,21 @@ export const CandidateMatching = ({ initialJobId = null }) => {
 
           {/* Candidates List */}
           {filteredMatches.length === 0 ? (
-            <div className="bg-white rounded-2xl p-12 text-center text-slate-400 border border-slate-200">
-              <Search className="w-10 h-10 mx-auto text-slate-300 mb-2" />
-              <p className="text-xs text-slate-600">No candidates match the selected filters.</p>
+            <div className="bg-white rounded-xl p-10 text-center text-slate-400 border border-slate-200">
+              <Search className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+              <p className="text-xs text-slate-600">No candidates match the specified filters.</p>
               <button
                 onClick={() => {
                   setMinScoreFilter(0);
                   setSearchQuery('');
                 }}
-                className="mt-3 text-indigo-600 text-xs font-semibold hover:underline"
+                className="mt-2 text-[#2563EB] text-xs font-semibold hover:underline"
               >
                 Reset Filters
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {filteredMatches.map((item, index) => {
                 const effectiveScore =
                   item.human_override_score !== null ? item.human_override_score : item.overall_score;
@@ -358,40 +347,39 @@ export const CandidateMatching = ({ initialJobId = null }) => {
                 return (
                   <div
                     key={item.candidate_id}
-                    className="bg-white rounded-2xl border border-slate-200 shadow-xs hover:border-slate-300 transition overflow-hidden"
+                    className="bg-white rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition overflow-hidden"
                   >
-                    <div className="p-5 space-y-4">
+                    <div className="p-5 space-y-3.5">
                       {/* Top Candidate Row */}
-                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div className="flex items-start gap-3.5">
-                          {/* Rank Number */}
-                          <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xs shrink-0">
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xs shrink-0 border border-slate-200">
                             #{index + 1}
                           </div>
 
                           <div>
                             <div className="flex items-center gap-2">
-                              <h3 className="font-bold text-slate-900 text-base">{item.candidate_name}</h3>
+                              <h3 className="font-bold text-slate-900 text-sm">{item.candidate_name}</h3>
                               {item.status === 'Shortlisted' && (
-                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                                <span className="enterprise-badge-success">
                                   <CheckCircle2 className="w-3 h-3" />
                                   Shortlisted
                                 </span>
                               )}
                               {isOverridden && (
                                 <span
-                                  className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200"
+                                  className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200"
                                   title={`Original AI Score: ${item.overall_score}%`}
                                 >
                                   Human Overridden
                                 </span>
                               )}
                             </div>
-                            <div className="text-xs text-slate-500 mt-0.5 flex flex-wrap gap-3">
+                            <div className="text-[11px] text-slate-500 mt-0.5 flex flex-wrap gap-2.5">
                               <span>{item.email}</span>
                               {item.phone && <span>• {item.phone}</span>}
                               {item.location && <span>• {item.location}</span>}
-                              <span>• {item.total_experience_years} years experience</span>
+                              <span>• {item.total_experience_years} yrs exp</span>
                             </div>
                           </div>
                         </div>
@@ -399,52 +387,52 @@ export const CandidateMatching = ({ initialJobId = null }) => {
                         {/* Overall Score Badge */}
                         <div className="flex items-center gap-3 self-end md:self-center">
                           <div
-                            className={`px-4 py-2 rounded-2xl border text-center ring-1 ${getScoreBadgeColor(
+                            className={`px-3.5 py-1.5 rounded-lg border text-center ${getScoreBadgeStyle(
                               effectiveScore
                             )}`}
                           >
-                            <div className="text-2xl font-black leading-none">{effectiveScore}%</div>
-                            <div className="text-[10px] font-bold uppercase tracking-wider mt-0.5">
-                              {isOverridden ? 'Adjusted Score' : 'Hybrid Match'}
+                            <div className="text-xl font-bold leading-none">{effectiveScore}%</div>
+                            <div className="text-[9px] font-bold uppercase tracking-wider mt-0.5">
+                              {isOverridden ? 'Adjusted' : 'Match Score'}
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      {/* 5-Factor Score Breakdown Progress Bar */}
-                      <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200 space-y-2 text-xs">
-                        <div className="flex justify-between items-center text-[11px] font-semibold text-slate-600">
-                          <span>5-Factor Hybrid Algorithm Breakdown</span>
+                      {/* 5-Factor Score Breakdown */}
+                      <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1.5 text-xs">
+                        <div className="flex justify-between items-center text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                          <span>5-Factor Algorithm Breakdown</span>
                           <span>Score: {item.overall_score} / 100</span>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-[10px]">
-                          <div className="bg-white p-2 rounded-lg border border-slate-200">
+                          <div className="bg-white p-1.5 rounded border border-slate-200">
                             <div className="text-slate-400 font-medium">Technical (35)</div>
                             <div className="font-bold text-slate-900 mt-0.5">
                               {item.score_breakdown?.technical_skills_score || 0} pts
                             </div>
                           </div>
-                          <div className="bg-white p-2 rounded-lg border border-slate-200">
+                          <div className="bg-white p-1.5 rounded border border-slate-200">
                             <div className="text-slate-400 font-medium">Experience (25)</div>
                             <div className="font-bold text-slate-900 mt-0.5">
                               {item.score_breakdown?.experience_score || 0} pts
                             </div>
                           </div>
-                          <div className="bg-white p-2 rounded-lg border border-slate-200">
+                          <div className="bg-white p-1.5 rounded border border-slate-200">
                             <div className="text-slate-400 font-medium">Education (15)</div>
                             <div className="font-bold text-slate-900 mt-0.5">
                               {item.score_breakdown?.education_score || 0} pts
                             </div>
                           </div>
-                          <div className="bg-white p-2 rounded-lg border border-slate-200">
+                          <div className="bg-white p-1.5 rounded border border-slate-200">
                             <div className="text-slate-400 font-medium">Preferred (5)</div>
                             <div className="font-bold text-slate-900 mt-0.5">
                               {item.score_breakdown?.preferred_skills_score || 0} pts
                             </div>
                           </div>
-                          <div className="bg-white p-2 rounded-lg border border-slate-200 col-span-2 sm:col-span-1">
+                          <div className="bg-white p-1.5 rounded border border-slate-200 col-span-2 sm:col-span-1">
                             <div className="text-slate-400 font-medium">Semantic (20)</div>
-                            <div className="font-bold text-indigo-600 mt-0.5">
+                            <div className="font-bold text-[#2563EB] mt-0.5">
                               {item.score_breakdown?.semantic_similarity_score || 0} pts
                             </div>
                           </div>
@@ -452,10 +440,9 @@ export const CandidateMatching = ({ initialJobId = null }) => {
                       </div>
 
                       {/* Skills Comparison */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                        {/* Matched Skills */}
-                        <div className="p-3 bg-emerald-50/40 rounded-xl border border-emerald-200/60">
-                          <div className="font-semibold text-emerald-900 text-[11px] mb-1.5 flex items-center gap-1">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
+                        <div className="p-2.5 bg-emerald-50/40 rounded-lg border border-emerald-200/60">
+                          <div className="font-semibold text-emerald-900 text-[11px] mb-1 flex items-center gap-1">
                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                             Matched Required Skills ({item.matched_skills.length})
                           </div>
@@ -466,7 +453,7 @@ export const CandidateMatching = ({ initialJobId = null }) => {
                               item.matched_skills.map((s, idx) => (
                                 <span
                                   key={idx}
-                                  className="px-2 py-0.5 bg-emerald-100/70 text-emerald-800 rounded-md font-medium text-[10px]"
+                                  className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 rounded font-medium text-[10px]"
                                 >
                                   {s}
                                 </span>
@@ -475,22 +462,21 @@ export const CandidateMatching = ({ initialJobId = null }) => {
                           </div>
                         </div>
 
-                        {/* Missing Skills */}
-                        <div className="p-3 bg-rose-50/40 rounded-xl border border-rose-200/60">
-                          <div className="font-semibold text-rose-900 text-[11px] mb-1.5 flex items-center gap-1">
+                        <div className="p-2.5 bg-rose-50/40 rounded-lg border border-rose-200/60">
+                          <div className="font-semibold text-rose-900 text-[11px] mb-1 flex items-center gap-1">
                             <AlertTriangle className="w-3.5 h-3.5 text-rose-500" />
                             Missing Required Skills ({item.missing_skills.length})
                           </div>
                           <div className="flex flex-wrap gap-1">
                             {item.missing_skills.length === 0 ? (
                               <span className="text-emerald-700 text-[10px] font-semibold">
-                                ✓ All required skills matched!
+                                ✓ All required skills matched
                               </span>
                             ) : (
                               item.missing_skills.map((s, idx) => (
                                 <span
                                   key={idx}
-                                  className="px-2 py-0.5 bg-rose-100/70 text-rose-800 rounded-md font-medium text-[10px]"
+                                  className="px-1.5 py-0.5 bg-rose-100 text-rose-800 rounded font-medium text-[10px]"
                                 >
                                   {s}
                                 </span>
@@ -501,22 +487,22 @@ export const CandidateMatching = ({ initialJobId = null }) => {
                       </div>
 
                       {/* Experience Comparison text */}
-                      <div className="text-[11px] text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+                      <div className="text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1 rounded border border-slate-200">
                         <span className="font-semibold text-slate-700">Experience Analysis:</span>{' '}
                         {item.experience_comparison}
                       </div>
 
                       {/* Overridden Reason Note if present */}
                       {isOverridden && (
-                        <div className="p-3 bg-purple-50 rounded-xl border border-purple-200 text-xs text-purple-900">
-                          <span className="font-bold">Human Override Note:</span> {item.human_override_reason}
+                        <div className="p-2.5 bg-amber-50 rounded-lg border border-amber-200 text-xs text-amber-900">
+                          <span className="font-bold">Human Override Audit:</span> {item.human_override_reason}
                         </div>
                       )}
 
                       {/* Internal Notes if present */}
                       {item.internal_notes && (
-                        <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900">
-                          <span className="font-bold">Recruiter Note:</span> {item.internal_notes}
+                        <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-800">
+                          <span className="font-bold">Internal Recruiter Note:</span> {item.internal_notes}
                         </div>
                       )}
 
@@ -524,14 +510,14 @@ export const CandidateMatching = ({ initialJobId = null }) => {
                       <div>
                         <button
                           onClick={() => toggleRationale(item.candidate_id)}
-                          className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition cursor-pointer"
+                          className="flex items-center gap-1.5 text-xs font-semibold text-[#2563EB] hover:text-blue-800 transition cursor-pointer"
                         >
-                          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                          <span>Explainable AI Rationale</span>
+                          <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+                          <span>Explainable AI (XAI) Rationale</span>
                           {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                         </button>
                         {isExpanded && (
-                          <div className="mt-2 p-3.5 bg-indigo-50/60 rounded-xl border border-indigo-200/80 text-xs text-indigo-950 leading-relaxed font-sans">
+                          <div className="mt-2 p-3 bg-blue-50/50 rounded-lg border border-blue-200/80 text-xs text-slate-800 leading-relaxed font-sans">
                             {item.recommendation_reason}
                           </div>
                         )}
@@ -539,43 +525,43 @@ export const CandidateMatching = ({ initialJobId = null }) => {
                     </div>
 
                     {/* Card Actions Bottom Bar */}
-                    <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
-                      <div className="flex items-center gap-2">
+                    <div className="px-5 py-2.5 bg-slate-50 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+                      <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => viewCandidateProfile(item.candidate_id)}
-                          className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                          className="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-md font-semibold flex items-center gap-1 transition cursor-pointer text-xs"
                         >
                           <Eye className="w-3.5 h-3.5 text-slate-500" />
-                          View Profile
+                          Profile
                         </button>
                         <button
                           onClick={() => openOverrideModal(item)}
-                          className="px-3 py-1.5 bg-white hover:bg-slate-100 text-purple-700 border border-purple-200 rounded-xl font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                          className="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-md font-semibold flex items-center gap-1 transition cursor-pointer text-xs"
                         >
-                          <Edit3 className="w-3.5 h-3.5 text-purple-600" />
-                          Override Score
+                          <Edit3 className="w-3.5 h-3.5 text-slate-500" />
+                          Override
                         </button>
                         <button
                           onClick={() => openNoteModal(item)}
-                          className="px-3 py-1.5 bg-white hover:bg-slate-100 text-amber-700 border border-amber-200 rounded-xl font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                          className="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-md font-semibold flex items-center gap-1 transition cursor-pointer text-xs"
                         >
-                          <MessageSquare className="w-3.5 h-3.5 text-amber-600" />
-                          Internal Note
+                          <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
+                          Note
                         </button>
                       </div>
 
                       <div>
                         {item.status === 'Shortlisted' ? (
-                          <span className="px-4 py-1.5 bg-emerald-100 text-emerald-800 font-bold rounded-xl flex items-center gap-1.5">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                            Already Shortlisted
+                          <span className="px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold rounded-md flex items-center gap-1 text-xs">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                            Shortlisted
                           </span>
                         ) : (
                           <button
                             onClick={() => handleShortlist(item.application_id)}
-                            className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-xs flex items-center gap-1.5 transition cursor-pointer"
+                            className="px-3 py-1 bg-[#16A34A] hover:bg-emerald-700 text-white font-semibold rounded-md shadow-xs flex items-center gap-1 transition cursor-pointer text-xs"
                           >
-                            <CheckCircle2 className="w-4 h-4" />
+                            <CheckCircle2 className="w-3.5 h-3.5" />
                             Shortlist Candidate
                           </button>
                         )}
@@ -591,16 +577,16 @@ export const CandidateMatching = ({ initialJobId = null }) => {
 
       {/* Human-in-the-Loop Override Modal */}
       {overrideModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-            <h3 className="font-bold text-slate-900 text-base mb-1">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-5 shadow-xl border border-slate-200">
+            <h3 className="font-bold text-slate-900 text-sm mb-1">
               Override Candidate Match Score
             </h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Human-in-the-loop audit: Overriding {overrideModal.item?.candidate_name}'s score requires an explanation for accountability.
+            <p className="text-xs text-slate-500 mb-3">
+              Recruiter Override Audit: Overriding {overrideModal.item?.candidate_name}'s score requires justification.
             </p>
 
-            <form onSubmit={submitOverride} className="space-y-4 text-xs">
+            <form onSubmit={submitOverride} className="space-y-3 text-xs">
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
                   Adjusted Score (0 to 100) *
@@ -613,7 +599,7 @@ export const CandidateMatching = ({ initialJobId = null }) => {
                   required
                   value={overrideModal.score}
                   onChange={(e) => setOverrideModal({ ...overrideModal, score: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-hidden text-sm font-bold"
+                  className="enterprise-input font-bold"
                 />
               </div>
 
@@ -624,10 +610,10 @@ export const CandidateMatching = ({ initialJobId = null }) => {
                 <textarea
                   rows={3}
                   required
-                  placeholder="e.g. Demonstrated exceptional practical domain expertise during technical phone screening..."
+                  placeholder="e.g. Demonstrated strong practical experience during screening..."
                   value={overrideModal.reason}
                   onChange={(e) => setOverrideModal({ ...overrideModal, reason: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-hidden leading-relaxed"
+                  className="enterprise-input leading-relaxed"
                 />
               </div>
 
@@ -635,13 +621,13 @@ export const CandidateMatching = ({ initialJobId = null }) => {
                 <button
                   type="button"
                   onClick={() => setOverrideModal({ isOpen: false, item: null, score: '', reason: '' })}
-                  className="px-4 py-2 border border-slate-300 hover:bg-slate-100 rounded-xl font-semibold cursor-pointer"
+                  className="enterprise-btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold cursor-pointer shadow-xs"
+                  className="enterprise-btn-primary"
                 >
                   Save Override
                 </button>
@@ -653,23 +639,23 @@ export const CandidateMatching = ({ initialJobId = null }) => {
 
       {/* Internal Recruiter Note Modal */}
       {noteModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-            <h3 className="font-bold text-slate-900 text-base mb-1">Internal Recruiter Note</h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Add private notes for hiring managers regarding {noteModal.item?.candidate_name}.
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-5 shadow-xl border border-slate-200">
+            <h3 className="font-bold text-slate-900 text-sm mb-1">Internal Recruiter Note</h3>
+            <p className="text-xs text-slate-500 mb-3">
+              Add private notes for {noteModal.item?.candidate_name}.
             </p>
 
-            <form onSubmit={submitNote} className="space-y-4 text-xs">
+            <form onSubmit={submitNote} className="space-y-3 text-xs">
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">Note Content *</label>
                 <textarea
                   rows={4}
                   required
-                  placeholder="e.g. Strong team player, available for immediate joining, notice period 2 weeks..."
+                  placeholder="e.g. Notice period 2 weeks, strong domain knowledge..."
                   value={noteModal.note}
                   onChange={(e) => setNoteModal({ ...noteModal, note: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-hidden leading-relaxed"
+                  className="enterprise-input leading-relaxed"
                 />
               </div>
 
@@ -677,13 +663,13 @@ export const CandidateMatching = ({ initialJobId = null }) => {
                 <button
                   type="button"
                   onClick={() => setNoteModal({ isOpen: false, item: null, note: '' })}
-                  className="px-4 py-2 border border-slate-300 hover:bg-slate-100 rounded-xl font-semibold cursor-pointer"
+                  className="enterprise-btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold cursor-pointer shadow-xs"
+                  className="enterprise-btn-primary"
                 >
                   Save Note
                 </button>

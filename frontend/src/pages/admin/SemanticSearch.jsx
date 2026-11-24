@@ -51,16 +51,16 @@ export const SemanticSearch = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
+    <div className="space-y-5">
+      {/* Search Header Banner */}
+      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-4">
         <div>
           <div className="flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-indigo-600" />
-            <h2 className="text-xl font-bold text-slate-900">Natural Language Semantic Search</h2>
+            <Sparkles className="w-5 h-5 text-[#2563EB]" />
+            <h2 className="text-base font-bold text-slate-900">Natural Language Semantic Talent Search</h2>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
-            Search candidates by conceptual meaning, tech stacks, and domain expertise using vector embeddings and cosine similarity indexing.
+          <p className="text-xs text-slate-500 mt-0.5">
+            Query candidates by conceptual meaning, technical skills, and domain experience using dense vector embeddings and cosine similarity.
           </p>
         </div>
 
@@ -73,29 +73,29 @@ export const SemanticSearch = () => {
           className="flex gap-2"
         >
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
               placeholder="e.g. Find senior React developers with 4+ years of TypeScript and state management experience..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#2563EB]"
             />
           </div>
           <button
             type="submit"
             disabled={loading || !query.trim()}
-            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white text-xs font-semibold rounded-xl shadow-xs flex items-center gap-2 transition cursor-pointer shrink-0"
+            className="enterprise-btn-primary shrink-0"
           >
-            <Sparkles className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : 'text-amber-300'}`} />
-            {loading ? 'Searching...' : 'Semantic Search'}
+            <Sparkles className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : 'text-blue-200'}`} />
+            <span>{loading ? 'Searching...' : 'Search Talent'}</span>
           </button>
         </form>
 
         {/* Sample Queries Pills */}
         <div className="space-y-1.5 pt-1">
-          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-            Quick Assessment Queries:
+          <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+            Assessment Test Queries:
           </div>
           <div className="flex flex-wrap gap-1.5">
             {sampleQueries.map((sample, idx) => (
@@ -103,7 +103,7 @@ export const SemanticSearch = () => {
                 key={idx}
                 type="button"
                 onClick={() => handleSampleClick(sample)}
-                className="px-3 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 text-slate-600 text-[11px] rounded-lg border border-slate-200 transition cursor-pointer text-left"
+                className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 text-[11px] rounded-md border border-slate-200 transition cursor-pointer text-left"
               >
                 "{sample}"
               </button>
@@ -113,7 +113,7 @@ export const SemanticSearch = () => {
       </div>
 
       {error && (
-        <div className="p-3.5 bg-red-50 border border-red-200 text-red-800 text-xs rounded-xl flex items-center gap-2">
+        <div className="p-3 bg-red-50 border border-red-200 text-red-800 text-xs rounded-lg flex items-center gap-2">
           <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
           <span>{error}</span>
         </div>
@@ -123,33 +123,33 @@ export const SemanticSearch = () => {
       {results.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs text-slate-500 px-1 font-semibold">
-            <span>Semantic Matches Found ({results.length})</span>
-            <span>Sorted by Cosine Similarity</span>
+            <span>Semantic Results ({results.length} Candidates)</span>
+            <span>Sorted by Cosine Similarity Index</span>
           </div>
 
           <div className="grid grid-cols-1 gap-3">
             {results.map((r, idx) => (
               <div
                 key={r.candidate_id}
-                className="bg-white rounded-2xl border border-slate-200 shadow-xs hover:border-slate-300 p-5 transition flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+                className="bg-white rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 p-4 transition flex flex-col md:flex-row justify-between items-start md:items-center gap-3"
               >
                 <div className="space-y-2 flex-1">
-                  <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-md bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center font-bold text-xs shrink-0">
                       #{idx + 1}
                     </div>
                     <div>
-                      <h3 className="font-bold text-slate-900 text-base">{r.candidate_name}</h3>
-                      <div className="text-xs text-slate-500 flex flex-wrap gap-2.5">
+                      <h3 className="font-bold text-slate-900 text-sm">{r.candidate_name}</h3>
+                      <div className="text-[11px] text-slate-500 flex flex-wrap gap-2">
                         <span>{r.email}</span>
                         {r.location && <span>• {r.location}</span>}
-                        <span>• {r.experience_years} years exp</span>
+                        <span>• {r.experience_years} yrs experience</span>
                       </div>
                     </div>
                   </div>
 
                   {r.summary && (
-                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed bg-slate-50 p-2.5 rounded border border-slate-100">
                       {r.summary}
                     </p>
                   )}
@@ -159,7 +159,7 @@ export const SemanticSearch = () => {
                     {r.skills?.map((s, sIdx) => (
                       <span
                         key={sIdx}
-                        className="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-md text-[10px] font-medium"
+                        className="px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded text-[10px] font-medium"
                       >
                         {s}
                       </span>
@@ -169,16 +169,16 @@ export const SemanticSearch = () => {
 
                 {/* Similarity Badge & Action */}
                 <div className="flex items-center gap-3 self-end md:self-center shrink-0">
-                  <div className="px-3.5 py-1.5 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 text-center">
-                    <div className="text-xl font-black">{r.similarity_percent}%</div>
+                  <div className="px-3 py-1.5 rounded-lg bg-blue-50 text-[#1E40AF] border border-blue-200 text-center">
+                    <div className="text-lg font-bold">{r.similarity_percent}%</div>
                     <div className="text-[9px] font-bold uppercase tracking-wider">Similarity</div>
                   </div>
                   <button
                     onClick={() => viewProfile(r.candidate_id)}
-                    className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer"
+                    className="enterprise-btn-secondary"
                   >
                     <Eye className="w-3.5 h-3.5 text-slate-500" />
-                    View
+                    <span>View Profile</span>
                   </button>
                 </div>
               </div>
