@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api/client';
 import { CandidateDetailModal } from '../../components/CandidateDetailModal';
+import { InterviewScheduleModal } from '../../components/InterviewScheduleModal';
 import {
   Sparkles,
   Briefcase,
@@ -15,7 +16,9 @@ import {
   Eye,
   MessageSquare,
   X,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Calendar,
+  Download
 } from 'lucide-react';
 
 export const CandidateMatching = ({ initialJobId = null }) => {
@@ -35,6 +38,8 @@ export const CandidateMatching = ({ initialJobId = null }) => {
   const [selectedCandidateForModal, setSelectedCandidateForModal] = useState(null);
   const [overrideModal, setOverrideModal] = useState({ isOpen: false, item: null, score: '', reason: '' });
   const [noteModal, setNoteModal] = useState({ isOpen: false, item: null, note: '' });
+  const [scheduleModal, setScheduleModal] = useState({ isOpen: false, item: null });
+  const [exporting, setExporting] = useState(false);
 
   // Load jobs on mount
   useEffect(() => {
@@ -93,6 +98,35 @@ export const CandidateMatching = ({ initialJobId = null }) => {
     } catch (err) {
       console.error('Shortlist failed:', err);
       setError(err.response?.data?.detail || 'Failed to shortlist candidate.');
+    }
+  };
+
+  const handleExportShortlist = async (format = 'csv') => {
+    if (!selectedJobId) return;
+    setExporting(true);
+    try {
+      const response = await api.get(`/applications/job/${selectedJobId}/export-shortlist?format=${format}`, {
+        responseType: 'blob'
+      });
+      const blob = new Blob([response.data], {
+        type: format === 'csv' ? 'text/csv' : 'application/json'
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `shortlist_job_${selectedJobId}.${format}`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      setSuccess(`Shortlist exported successfully as ${format.toUpperCase()}!`);
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error('Export failed:', err);
+      setError('No shortlisted candidates found to export for this job requisition.');
+      setTimeout(() => setError(null), 4000);
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -234,6 +268,16 @@ export const CandidateMatching = ({ initialJobId = null }) => {
             >
               <Sparkles className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : 'text-blue-200'}`} />
               <span>{loading ? 'Evaluating...' : 'Run Matching Engine'}</span>
+            </button>
+
+            <button
+              onClick={() => handleExportShortlist('csv')}
+              disabled={exporting || !selectedJobId}
+              className="enterprise-btn-secondary shrink-0"
+              title="Export Shortlisted Candidates to CSV"
+            >
+              <Download className="w-3.5 h-3.5 text-slate-500" />
+              <span>{exporting ? 'Exporting...' : 'Export Shortlist (CSV)'}</span>
             </button>
           </div>
         </div>
@@ -550,12 +594,34 @@ export const CandidateMatching = ({ initialJobId = null }) => {
                         </button>
                       </div>
 
-                      <div>
+                      <div className="flex items-center gap-2">
                         {item.status === 'Shortlisted' ? (
-                          <span className="px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold rounded-md flex items-center gap-1 text-xs">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                            Shortlisted
-                          </span>
+                          <>
+                            <span className="px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold rounded-md flex items-center gap-1 text-xs">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                              Shortlisted
+                            </span>
+                            <button
+                              onClick={() => setScheduleModal({ isOpen: true, item })}
+                              className="px-3 py-1 bg-[#2563EB] hover:bg-blue-700 text-white font-semibold rounded-md shadow-xs flex items-center gap-1 transition cursor-pointer text-xs"
+                            >
+                              <Calendar className="w-3.5 h-3.5" />
+                              Schedule Interview
+                            </button>
+                          </>
+                        ) : item.status === 'Interview Scheduled' ? (
+                          <div className="flex items-center gap-2">
+                            <span className="px-3 py-1 bg-blue-50 text-[#2563EB] border border-blue-200 font-bold rounded-md flex items-center gap-1 text-xs">
+                              <Calendar className="w-3.5 h-3.5" />
+                              Interview Scheduled
+                            </span>
+                            <button
+                              onClick={() => setScheduleModal({ isOpen: true, item })}
+                              className="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-md font-semibold text-xs cursor-pointer"
+                            >
+                              Reschedule
+                            </button>
+                          </div>
                         ) : (
                           <button
                             onClick={() => handleShortlist(item.application_id)}
@@ -683,6 +749,27 @@ export const CandidateMatching = ({ initialJobId = null }) => {
       <CandidateDetailModal
         candidate={selectedCandidateForModal}
         onClose={() => setSelectedCandidateForModal(null)}
+      />
+
+      {/* Interview Schedule Modal */}
+      <InterviewScheduleModal
+        isOpen={scheduleModal.isOpen}
+        onClose={() => setScheduleModal({ isOpen: false, item: null })}
+        application={scheduleModal.item}
+        onScheduled={(interview) => {
+          setSuccess(`Interview scheduled successfully with ${interview.candidate_name}!`);
+          if (matchingData) {
+            setMatchingData({
+              ...matchingData,
+              matches: matchingData.matches.map((m) =>
+                m.application_id === scheduleModal.item?.application_id
+                  ? { ...m, status: 'Interview Scheduled' }
+                  : m
+              )
+            });
+          }
+          setTimeout(() => setSuccess(null), 4000);
+        }}
       />
     </div>
   );

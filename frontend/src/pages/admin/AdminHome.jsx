@@ -6,6 +6,7 @@ import { JobManagement } from './JobManagement';
 import { CandidateMatching } from './CandidateMatching';
 import { SemanticSearch } from './SemanticSearch';
 import { BulkResumeUpload } from './BulkResumeUpload';
+import { InterviewsManagement } from './InterviewsManagement';
 import {
   Briefcase,
   Sparkles,
@@ -22,7 +23,8 @@ import {
   ArrowRight,
   Shield,
   Layers,
-  ChevronRight
+  ChevronRight,
+  Calendar
 } from 'lucide-react';
 
 export const AdminHome = () => {
@@ -36,7 +38,8 @@ export const AdminHome = () => {
     jobsCount: 0,
     candidatesCount: 0,
     shortlistedCount: 0,
-    totalSkillsCount: 0
+    totalSkillsCount: 0,
+    interviewsCount: 0
   });
   const [candidatesList, setCandidatesList] = useState([]);
   const [jobsList, setJobsList] = useState([]);
@@ -46,9 +49,10 @@ export const AdminHome = () => {
   const fetchOverviewData = async () => {
     setLoadingData(true);
     try {
-      const [jobsRes, candidatesRes] = await Promise.all([
+      const [jobsRes, candidatesRes, interviewsRes] = await Promise.all([
         api.get('/jobs/'),
         api.get('/candidates/'),
+        api.get('/interviews/').catch(() => ({ data: [] }))
       ]);
       setJobsList(jobsRes.data);
       setCandidatesList(candidatesRes.data);
@@ -61,8 +65,9 @@ export const AdminHome = () => {
       setMetrics({
         jobsCount: jobsRes.data.length,
         candidatesCount: candidatesRes.data.length,
-        shortlistedCount: 0, // Will be populated when shortlisted apps exist
-        totalSkillsCount: totalSkills
+        shortlistedCount: 0,
+        totalSkillsCount: totalSkills,
+        interviewsCount: interviewsRes.data?.length || 0
       });
     } catch (err) {
       console.error('Failed to load overview data:', err);
@@ -128,6 +133,8 @@ export const AdminHome = () => {
                   ? 'Semantic Search'
                   : activeTab === 'candidates'
                   ? 'Resume Ingestion'
+                  : activeTab === 'interviews'
+                  ? 'Interviews & Schedules'
                   : 'RBAC Security'}
               </span>
             </div>
@@ -137,6 +144,7 @@ export const AdminHome = () => {
               {activeTab === 'matching' && 'AI-Powered Candidate Matching Engine'}
               {activeTab === 'search' && 'Natural Language Semantic Search'}
               {activeTab === 'candidates' && 'Resume Ingestion & Candidate Database'}
+              {activeTab === 'interviews' && 'Interview Coordination & Evaluator Feedback'}
               {activeTab === 'diagnostics' && 'System RBAC & API Diagnostics'}
             </h1>
           </div>
@@ -224,18 +232,18 @@ export const AdminHome = () => {
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                      Matching Methodology
+                      Scheduled Interviews
                     </div>
-                    <div className="text-2xl font-bold text-[#14243A] mt-1">
-                      5-Factor
+                    <div className="text-2xl font-bold text-[#2563EB] mt-1">
+                      {metrics.interviewsCount}
                     </div>
                   </div>
-                  <div className="p-2 rounded-lg bg-amber-50 text-[#F59E0B]">
-                    <Layers className="w-5 h-5" />
+                  <div className="p-2 rounded-lg bg-blue-50 text-[#2563EB]">
+                    <Calendar className="w-5 h-5" />
                   </div>
                 </div>
                 <div className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500">
-                  <span>Hybrid 35/25/15/5/20 Formula</span>
+                  <span className="font-semibold text-slate-700">{metrics.interviewsCount}</span> rounds coordinated
                 </div>
               </div>
             </div>
@@ -286,6 +294,17 @@ export const AdminHome = () => {
                     <div>
                       <div className="font-semibold text-slate-900 text-xs">Bulk Resume Ingestion</div>
                       <div className="text-[11px] text-slate-500">Upload multiple PDF/DOCX resumes</div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-slate-400" />
+                  </button>
+
+                  <button
+                    onClick={() => setActiveTab('interviews')}
+                    className="w-full p-3 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 text-left flex items-center justify-between transition cursor-pointer"
+                  >
+                    <div>
+                      <div className="font-semibold text-slate-900 text-xs">Interview Scheduling & Feedback</div>
+                      <div className="text-[11px] text-slate-500">Coordinate rounds, review evaluator feedback</div>
                     </div>
                     <ArrowRight className="w-4 h-4 text-slate-400" />
                   </button>
@@ -457,7 +476,12 @@ export const AdminHome = () => {
           </div>
         )}
 
-        {/* TAB 6: RBAC SECURITY DIAGNOSTICS */}
+        {/* TAB 6: INTERVIEW SCHEDULING & EVALUATIONS */}
+        {activeTab === 'interviews' && (
+          <InterviewsManagement />
+        )}
+
+        {/* TAB 7: RBAC SECURITY DIAGNOSTICS */}
         {activeTab === 'diagnostics' && (
           <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-xs space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">

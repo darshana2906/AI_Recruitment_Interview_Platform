@@ -15,7 +15,10 @@ import {
   AlertCircle,
   Building,
   Layers,
-  ChevronRight
+  ChevronRight,
+  Calendar,
+  Video,
+  ExternalLink
 } from 'lucide-react';
 
 export const CandidateHome = () => {
@@ -24,6 +27,7 @@ export const CandidateHome = () => {
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [availableJobs, setAvailableJobs] = useState([]);
   const [myApplications, setMyApplications] = useState([]);
+  const [myInterviews, setMyInterviews] = useState([]);
   const [applyingJobId, setApplyingJobId] = useState(null);
   const [applyMessage, setApplyMessage] = useState(null);
   const [testResult, setTestResult] = useState(null);
@@ -42,14 +46,16 @@ export const CandidateHome = () => {
 
   const fetchJobsAndApplications = async () => {
     try {
-      const [jobsRes, appsRes] = await Promise.all([
+      const [jobsRes, appsRes, interviewsRes] = await Promise.all([
         api.get('/jobs/'),
-        api.get('/applications/my-applications')
+        api.get('/applications/my-applications'),
+        api.get('/interviews/my-interviews').catch(() => ({ data: [] }))
       ]);
       setAvailableJobs(jobsRes.data.filter((j) => j.status === 'Active'));
       setMyApplications(appsRes.data);
+      setMyInterviews(interviewsRes.data || []);
     } catch (err) {
-      console.error('Failed to load jobs/applications:', err);
+      console.error('Failed to load jobs/applications/interviews:', err);
     }
   };
 
@@ -179,6 +185,10 @@ export const CandidateHome = () => {
                     className={
                       app.status === 'Shortlisted'
                         ? 'enterprise-badge-success'
+                        : app.status === 'Interview Scheduled'
+                        ? 'enterprise-badge-info'
+                        : app.status === 'Selected'
+                        ? 'bg-emerald-100 text-emerald-900 border border-emerald-300 px-2 py-0.5 rounded text-[10px] font-bold'
                         : 'enterprise-badge-info'
                     }
                   >
@@ -190,6 +200,90 @@ export const CandidateHome = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Scheduled Interview Invitations */}
+      {myInterviews.length > 0 && (
+        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-[#2563EB]" />
+              <h2 className="text-sm font-bold text-slate-900">
+                Scheduled Interview Invitations ({myInterviews.length})
+              </h2>
+            </div>
+            <span className="text-[11px] text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 font-semibold">
+              Rounds Active
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            {myInterviews.map((item) => {
+              const dt = new Date(item.scheduled_at);
+              const dateStr = dt.toLocaleDateString(undefined, {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+              });
+              const timeStr = dt.toLocaleTimeString(undefined, {
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+
+              return (
+                <div
+                  key={item.id}
+                  className="p-4 bg-blue-50/40 border border-blue-200/80 rounded-xl space-y-2.5 text-xs"
+                >
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <h3 className="font-bold text-slate-900 text-sm">{item.job_title}</h3>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        Evaluator: <strong className="text-slate-800">{item.interviewer_name || 'Assigned Technical Evaluator'}</strong>
+                      </p>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                        item.status === 'Completed'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                          : 'bg-blue-100 text-blue-800 border-blue-200'
+                      }`}
+                    >
+                      {item.status}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-slate-700 font-medium">
+                    <Clock className="w-3.5 h-3.5 text-slate-500" />
+                    <span>{dateStr} at {timeStr} ({item.duration_minutes} min)</span>
+                  </div>
+
+                  {item.notes && (
+                    <p className="text-[11px] text-slate-600 bg-white p-2 rounded border border-blue-100">
+                      <span className="font-semibold text-slate-800">Preparation:</span> {item.notes}
+                    </p>
+                  )}
+
+                  {item.meeting_link && (
+                    <div className="pt-1">
+                      <a
+                        href={item.meeting_link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2563EB] hover:bg-blue-700 text-white font-semibold rounded-lg text-xs transition shadow-xs cursor-pointer"
+                      >
+                        <Video className="w-3.5 h-3.5" />
+                        <span>Join Video Interview</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

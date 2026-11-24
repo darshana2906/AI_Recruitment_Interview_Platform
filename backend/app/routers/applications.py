@@ -1,6 +1,6 @@
 import logging
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -228,3 +228,92 @@ def get_job_shortlist(
         })
 
     return results
+
+
+@router.get("/job/{job_id}/export-shortlist")
+def export_job_shortlist(
+    job_id: int,
+    format: str = Query("csv", pattern="^(csv|json)$"),
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """Export shortlisted candidates for a job in CSV or JSON format.
+
+    (Assessment Requirement: Shortlist Export for Hiring Managers)
+    """
+    import csv
+    import io
+    from fastapi.responses import Response
+
+    job = db.query(Job).filter(Job.id == job_id).first()
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job #{job_id} not found."
+        )
+
+    apps = db.query(Application).filter(
+        Application.job_id == job_id,
+        Application.status.in_(["Shortlisted", "Approved", "Interview Scheduled", "Selected", "Evaluated"])
+    ).all()
+
+    if format == "json":
+        return [
+            {
+                "application_id": a.id,
+                "candidate_name": a.candidate.full_name if a.candidate else "Unknown",
+                "email": a.candidate.email if a.candidate else "",
+                "phone": a.candidate.phone if a.candidate else "",
+                "location": a.candidate.location if a.candidate else "",
+                "experience_years": a.candidate.total_experience_years if a.candidate else 0.0,
+                "score": a.final_score,
+                "status": a.status,
+                "matched_skills": ", ".join(a.matched_skills or []),
+                "notes": a.internal_notes or ""
+            }
+            for a in apps
+        ]
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "Application ID",
+        "Candidate Name",
+        "Email",
+        "Phone",
+        "Location",
+        "Experience (Years)",
+        "Final Match Score",
+        "Application Status",
+        "Matched Skills",
+        "Missing Skills",
+        "Recruiter Notes"
+    ])
+
+    for a in apps:
+        cand = a.candidate
+        writer.writerow([
+            a.id,
+            cand.full_name if cand else "Unknown",
+            cand.email if cand else "",
+            cand.phone if cand else "",
+            cand.location if cand else "",
+            cand.total_experience_years if cand else 0.0,
+            f"{a.final_score:.1f}%",
+            a.status,
+            ", ".join(a.matched_skills or []),
+            ", ".join(a.missing_skills or []),
+            a.internal_notes or ""
+        ])
+
+    csv_content = output.getvalue()
+    safe_title = "".join(c for c in job.title if c.isalnum() or c in (' ', '_', '-')).strip().replace(' ', '_')
+    filename = f"shortlist_job_{job.id}_{safe_title}.csv"
+
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"'
+        }
+    )

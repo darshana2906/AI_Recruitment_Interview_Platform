@@ -13,6 +13,7 @@ from app.routers import (
     candidates_router,
     jobs_router,
     applications_router,
+    interviews_router,
 )
 
 # Setup logging
@@ -102,6 +103,7 @@ app.include_router(users_router, prefix="/api")
 app.include_router(candidates_router, prefix="/api")
 app.include_router(jobs_router, prefix="/api")
 app.include_router(applications_router, prefix="/api")
+app.include_router(interviews_router, prefix="/api")
 
 
 @app.get("/", tags=["Root"])

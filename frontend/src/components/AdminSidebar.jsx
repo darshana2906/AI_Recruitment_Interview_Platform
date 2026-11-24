@@ -9,7 +9,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
-  Layers
+  Layers,
+  Calendar
 } from 'lucide-react';
 
 export const AdminSidebar = ({
@@ -50,6 +51,12 @@ export const AdminSidebar = ({
       label: 'Resume Ingestion',
       icon: UploadCloud,
       badge: metrics?.candidatesCount || 0
+    },
+    {
+      id: 'interviews',
+      label: 'Interviews & Schedules',
+      icon: Calendar,
+      badge: metrics?.interviewsCount || null
     },
     {
       id: 'diagnostics',
