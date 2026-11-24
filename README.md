@@ -134,7 +134,17 @@ Every scenario from the Tier 2 Assessment document was implemented and verified 
 - **Node.js**: Version 18+ and `npm`
 - **Git**
 
-### Step 1: Clone Repository
+### Quick Launch (One-Click PowerShell Script)
+You can launch both the backend and frontend servers simultaneously using:
+```powershell
+.\start_platform.ps1
+```
+
+---
+
+### Manual Step-by-Step Setup
+
+#### Step 1: Clone Repository
 ```powershell
 git clone <repository_url>
 cd AI_Recruitment_Interview_Platform
@@ -258,6 +268,7 @@ tests/test_resume_processing.py::test_candidate_cannot_access_another_candidates
 
 ## 8. Documentation References
 
+- [Assessment Test Scenarios Verification Report (12 Scenarios)](docs/TEST_SCENARIOS_RESULTS.md)
 - [Database Entity-Relationship (ER) Diagram](docs/ER_DIAGRAM.md)
 - [5-Factor Hybrid Candidate Matching Methodology](docs/MATCHING_METHODOLOGY.md)
 
