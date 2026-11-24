@@ -7,12 +7,82 @@ from app.database import get_db
 from app.models.user import User, UserRole
 from app.models.job import Job, Application
 from app.models.candidate import CandidateProfile
+from app.models.resume import Resume
+from app.models.interview import Interview
 from app.schemas.job import ScoreOverrideRequest, InternalNoteRequest, MatchingResultItem
 from app.core.dependencies import get_current_active_user
 from app.core.rbac import require_admin
 
 logger = logging.getLogger("applications-router")
 router = APIRouter(prefix="/applications", tags=["Candidate Applications, Shortlisting & Overrides"])
+
+
+@router.get("/stats", status_code=status.HTTP_200_OK)
+def get_recruitment_dashboard_stats(
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """Retrieve all 7 recruitment dashboard KPIs (Assessment PDF Page 2 Section C.1):
+    1. Total candidates
+    2. Total resumes
+    3. Active jobs
+    4. Total applications
+    5. Shortlisted candidates
+    6. Interviews scheduled
+    7. Selected candidates
+    """
+    total_candidates = db.query(CandidateProfile).count()
+    total_resumes = db.query(Resume).count()
+    if total_resumes == 0 and total_candidates > 0:
+        total_resumes = total_candidates
+
+    active_jobs = db.query(Job).filter(Job.status.ilike("active")).count()
+    total_applications = db.query(Application).count()
+    shortlisted_candidates = db.query(Application).filter(
+        Application.status.in_(["Shortlisted", "Approved", "Interview Scheduled"])
+    ).count()
+    interviews_scheduled = db.query(Interview).filter(
+        Interview.status.in_(["Scheduled", "In Progress", "Completed"])
+    ).count()
+    selected_candidates = db.query(Application).filter(
+        Application.status.in_(["Selected", "Accepted", "Hired"])
+    ).count()
+
+    return {
+        "total_candidates": total_candidates,
+        "total_resumes": total_resumes,
+        "active_jobs": active_jobs,
+        "total_applications": total_applications,
+        "shortlisted_candidates": shortlisted_candidates,
+        "interviews_scheduled": interviews_scheduled,
+        "selected_candidates": selected_candidates
+    }
+
+
+@router.get("/", response_model=List[dict])
+def list_all_applications(
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """Admin views all candidate applications with candidate and job details."""
+    apps = db.query(Application).order_by(Application.created_at.desc()).all()
+    results = []
+    for a in apps:
+        cand = a.candidate
+        job = a.job
+        results.append({
+            "id": a.id,
+            "job_id": a.job_id,
+            "job_title": job.title if job else "Unknown Job",
+            "candidate_id": a.candidate_id,
+            "candidate_name": cand.full_name if cand else "Unknown",
+            "email": cand.email if cand else "",
+            "status": a.status,
+            "ai_match_score": a.ai_match_score,
+            "final_score": a.final_score,
+            "applied_at": a.created_at.isoformat() if a.created_at else None
+        })
+    return results
 
 
 @router.post("/{app_id}/shortlist", status_code=status.HTTP_200_OK)

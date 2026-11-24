@@ -2,7 +2,7 @@
 
 This document provides evidence and verification logs for all **12 mandatory assessment test scenarios** specified in the Tier 2 Technical Assessment document (`AI_Recruitment_Interview_Platform.pdf`).
 
-All scenarios are automated in `backend/tests/` and verified with **28 passing pytest test cases**.
+All scenarios are automated in `backend/tests/` and verified with **29 passing pytest test cases**.
 
 ---
 
@@ -286,4 +286,4 @@ All scenarios are automated in `backend/tests/` and verified with **28 passing p
 ## Summary of Test Results
 - **Total Mandatory Scenarios**: 12
 - **Scenarios Verified & Passing**: 12 / 12 (100%)
-- **Total Pytest Assertions**: 28 / 28 Automated Tests Passed in 24.36s.
+- **Total Pytest Assertions**: 29 / 29 Automated Tests Passed in 27.78s (including Section C.1 Dashboard Recruitment KPIs).

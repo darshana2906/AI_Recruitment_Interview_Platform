@@ -33,12 +33,18 @@ export const AdminHome = () => {
   const [selectedJobForMatching, setSelectedJobForMatching] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Metrics
+  // 7 Tier 2 Assessment Metrics (PDF Page 2 Section C.1) + Verified Skills
   const [metrics, setMetrics] = useState({
+    totalCandidates: 0,
+    totalResumes: 0,
+    activeJobs: 0,
+    totalApplications: 0,
+    shortlistedCandidates: 0,
+    interviewsScheduled: 0,
+    selectedCandidates: 0,
+    totalSkillsCount: 0,
     jobsCount: 0,
     candidatesCount: 0,
-    shortlistedCount: 0,
-    totalSkillsCount: 0,
     interviewsCount: 0
   });
   const [candidatesList, setCandidatesList] = useState([]);
@@ -49,10 +55,11 @@ export const AdminHome = () => {
   const fetchOverviewData = async () => {
     setLoadingData(true);
     try {
-      const [jobsRes, candidatesRes, interviewsRes] = await Promise.all([
+      const [jobsRes, candidatesRes, interviewsRes, statsRes] = await Promise.all([
         api.get('/jobs/'),
         api.get('/candidates/'),
-        api.get('/interviews/').catch(() => ({ data: [] }))
+        api.get('/interviews/').catch(() => ({ data: [] })),
+        api.get('/applications/stats').catch(() => null)
       ]);
       setJobsList(jobsRes.data);
       setCandidatesList(candidatesRes.data);
@@ -62,12 +69,27 @@ export const AdminHome = () => {
         0
       );
 
+      const stats = statsRes?.data || {};
+      const totalCandidates = stats.total_candidates ?? candidatesRes.data.length;
+      const totalResumes = stats.total_resumes ?? candidatesRes.data.length;
+      const activeJobs = stats.active_jobs ?? jobsRes.data.filter(j => (j.status || '').toLowerCase() === 'active').length;
+      const totalApplications = stats.total_applications ?? 0;
+      const shortlistedCandidates = stats.shortlisted_candidates ?? 0;
+      const interviewsScheduled = stats.interviews_scheduled ?? (interviewsRes.data?.length || 0);
+      const selectedCandidates = stats.selected_candidates ?? 0;
+
       setMetrics({
-        jobsCount: jobsRes.data.length,
-        candidatesCount: candidatesRes.data.length,
-        shortlistedCount: 0,
+        totalCandidates,
+        totalResumes,
+        activeJobs,
+        totalApplications,
+        shortlistedCandidates,
+        interviewsScheduled,
+        selectedCandidates,
         totalSkillsCount: totalSkills,
-        interviewsCount: interviewsRes.data?.length || 0
+        jobsCount: activeJobs,
+        candidatesCount: totalCandidates,
+        interviewsCount: interviewsScheduled
       });
     } catch (err) {
       console.error('Failed to load overview data:', err);
@@ -169,35 +191,17 @@ export const AdminHome = () => {
         {/* TAB 1: EXECUTIVE OVERVIEW & KPIS */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
-            {/* 4 Professional KPI Cards */}
+            {/* 7 Official Assessment KPI Cards (PDF Page 2 Section C.1) + Verified Skills */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
+              {/* KPI 1: Total Candidates */}
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition">
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                      Active Requisitions
+                      Total Candidates
                     </div>
                     <div className="text-2xl font-bold text-slate-900 mt-1">
-                      {metrics.jobsCount}
-                    </div>
-                  </div>
-                  <div className="p-2 rounded-lg bg-blue-50 text-[#2563EB]">
-                    <Briefcase className="w-5 h-5" />
-                  </div>
-                </div>
-                <div className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500">
-                  <span className="font-semibold text-emerald-600">Active</span> job openings in system
-                </div>
-              </div>
-
-              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                      Candidate Talent Pool
-                    </div>
-                    <div className="text-2xl font-bold text-slate-900 mt-1">
-                      {metrics.candidatesCount}
+                      {metrics.totalCandidates}
                     </div>
                   </div>
                   <div className="p-2 rounded-lg bg-emerald-50 text-[#16A34A]">
@@ -205,17 +209,138 @@ export const AdminHome = () => {
                   </div>
                 </div>
                 <div className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500">
-                  <span className="font-semibold text-slate-700">{metrics.candidatesCount}</span> resumes parsed & indexed
+                  <span className="font-semibold text-slate-700">{metrics.totalCandidates}</span> talent pool candidates
                 </div>
               </div>
 
-              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
+              {/* KPI 2: Total Resumes */}
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                      Total Resumes
+                    </div>
+                    <div className="text-2xl font-bold text-slate-900 mt-1">
+                      {metrics.totalResumes}
+                    </div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-sky-50 text-sky-600">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500">
+                  <span className="font-semibold text-slate-700">{metrics.totalResumes}</span> parsed & indexed documents
+                </div>
+              </div>
+
+              {/* KPI 3: Active Jobs */}
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                      Active Jobs
+                    </div>
+                    <div className="text-2xl font-bold text-slate-900 mt-1">
+                      {metrics.activeJobs}
+                    </div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-blue-50 text-[#2563EB]">
+                    <Briefcase className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500">
+                  <span className="font-semibold text-emerald-600">Active</span> open requisitions
+                </div>
+              </div>
+
+              {/* KPI 4: Total Applications */}
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                      Total Applications
+                    </div>
+                    <div className="text-2xl font-bold text-slate-900 mt-1">
+                      {metrics.totalApplications}
+                    </div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
+                    <Layers className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500">
+                  <span className="font-semibold text-slate-700">{metrics.totalApplications}</span> pipeline submissions
+                </div>
+              </div>
+
+              {/* KPI 5: Shortlisted Candidates */}
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                      Shortlisted Candidates
+                    </div>
+                    <div className="text-2xl font-bold text-amber-600 mt-1">
+                      {metrics.shortlistedCandidates}
+                    </div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-amber-50 text-amber-600">
+                    <UserCheck className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500">
+                  <span className="font-semibold text-slate-700">{metrics.shortlistedCandidates}</span> approved for interviews
+                </div>
+              </div>
+
+              {/* KPI 6: Interviews Scheduled */}
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                      Interviews Scheduled
+                    </div>
+                    <div className="text-2xl font-bold text-[#2563EB] mt-1">
+                      {metrics.interviewsScheduled}
+                    </div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-blue-50 text-[#2563EB]">
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500">
+                  <span className="font-semibold text-slate-700">{metrics.interviewsScheduled}</span> rounds coordinated
+                </div>
+              </div>
+
+              {/* KPI 7: Selected Candidates */}
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                      Selected Candidates
+                    </div>
+                    <div className="text-2xl font-bold text-emerald-600 mt-1">
+                      {metrics.selectedCandidates}
+                    </div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+                    <CheckCircle2 className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500">
+                  <span className="font-semibold text-slate-700">{metrics.selectedCandidates}</span> offered / accepted
+                </div>
+              </div>
+
+              {/* Bonus KPI: Verified Skills Extracted */}
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition">
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                       Verified Skills Extracted
                     </div>
-                    <div className="text-2xl font-bold text-slate-900 mt-1">
+                    <div className="text-2xl font-bold text-purple-600 mt-1">
                       {metrics.totalSkillsCount}
                     </div>
                   </div>
@@ -225,25 +350,6 @@ export const AdminHome = () => {
                 </div>
                 <div className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500">
                   <span>Structured LLM entities indexed</span>
-                </div>
-              </div>
-
-              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                      Scheduled Interviews
-                    </div>
-                    <div className="text-2xl font-bold text-[#2563EB] mt-1">
-                      {metrics.interviewsCount}
-                    </div>
-                  </div>
-                  <div className="p-2 rounded-lg bg-blue-50 text-[#2563EB]">
-                    <Calendar className="w-5 h-5" />
-                  </div>
-                </div>
-                <div className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500">
-                  <span className="font-semibold text-slate-700">{metrics.interviewsCount}</span> rounds coordinated
                 </div>
               </div>
             </div>

@@ -244,3 +244,35 @@ def test_job_crud_update_and_delete():
     # Verify deleted
     get_res = client.get(f"/api/jobs/{job_id}")
     assert get_res.status_code == 404
+
+
+def test_recruitment_dashboard_7_kpis_stats():
+    """Verify Section C.1: 7 Dashboard Recruitment KPIs.
+    1. Total candidates
+    2. Total resumes
+    3. Active jobs
+    4. Total applications
+    5. Shortlisted candidates
+    6. Interviews scheduled
+    7. Selected candidates
+    """
+    admin_token = get_token("test_admin@test.com")
+    headers = {"Authorization": f"Bearer {admin_token}"}
+
+    stats_res = client.get("/api/applications/stats", headers=headers)
+    assert stats_res.status_code == 200
+    data = stats_res.json()
+    assert "total_candidates" in data
+    assert "total_resumes" in data
+    assert "active_jobs" in data
+    assert "total_applications" in data
+    assert "shortlisted_candidates" in data
+    assert "interviews_scheduled" in data
+    assert "selected_candidates" in data
+    assert data["total_candidates"] >= 1
+    assert data["active_jobs"] >= 1
+
+    # Verify applications list endpoint
+    apps_res = client.get("/api/applications/", headers=headers)
+    assert apps_res.status_code == 200
+    assert isinstance(apps_res.json(), list)
