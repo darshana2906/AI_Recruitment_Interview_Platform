@@ -29,9 +29,9 @@ def auto_seed_users():
     db = SessionLocal()
     try:
         defaults = [
-            ("admin@recruitment.ai", "Admin@12345", "System Administrator", UserRole.ADMIN.value),
-            ("interviewer@recruitment.ai", "Interviewer@12345", "Technical Interviewer", UserRole.INTERVIEWER.value),
-            ("candidate@recruitment.ai", "Candidate@12345", "John Doe (Candidate)", UserRole.CANDIDATE.value),
+            ("admin@recruitment.ai", "AdminPass123!", "System Administrator", UserRole.ADMIN.value),
+            ("interviewer@recruitment.ai", "InterviewerPass123!", "Technical Interviewer", UserRole.INTERVIEWER.value),
+            ("candidate@recruitment.ai", "CandidatePass123!", "John Doe (Candidate)", UserRole.CANDIDATE.value),
         ]
         for email, pwd, name, role in defaults:
             exists = db.query(User).filter(User.email == email).first()
