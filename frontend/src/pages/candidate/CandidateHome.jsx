@@ -183,7 +183,9 @@ export const CandidateHome = () => {
                   <span className="font-bold text-slate-900">{app.job_title}</span>
                   <span
                     className={
-                      app.status === 'Shortlisted'
+                      app.status === 'Approved'
+                        ? 'bg-purple-100 text-purple-900 border border-purple-300 px-2 py-0.5 rounded text-[10px] font-bold'
+                        : app.status === 'Shortlisted'
                         ? 'enterprise-badge-success'
                         : app.status === 'Interview Scheduled'
                         ? 'enterprise-badge-info'
@@ -198,6 +200,12 @@ export const CandidateHome = () => {
                 <div className="text-[11px] text-slate-500">
                   <span>Location: {app.job_location}</span>
                 </div>
+                {app.notification && (
+                  <div className="p-2 bg-purple-50 border border-purple-200 rounded text-[11px] text-purple-800 flex items-start gap-1.5 font-medium">
+                    <Sparkles className="w-3.5 h-3.5 text-purple-600 mt-0.5 shrink-0" />
+                    <span>{app.notification}</span>
+                  </div>
+                )}
               </div>
             ))}
           </div>

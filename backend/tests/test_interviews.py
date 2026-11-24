@@ -54,8 +54,35 @@ def ensure_sample_data():
         })
 
 
-def test_scenario_9_admin_schedules_interview():
-    """Scenario #9: Admin schedules an interview -> Candidate and Interviewer receive details."""
+def test_scenario_9_admin_approves_candidate():
+    """Scenario #9 (PDF): Admin approves a candidate -> Candidate receives an interview notification."""
+    admin_token = get_token("test_admin@test.com")
+    headers = {"Authorization": f"Bearer {admin_token}"}
+
+    jobs_res = client.get("/api/jobs/")
+    job_id = jobs_res.json()[0]["id"]
+
+    # Match candidates to obtain an application
+    match_res = client.post(f"/api/jobs/{job_id}/match", headers=headers)
+    matches = match_res.json()["matches"]
+    assert len(matches) > 0
+    top_match = matches[0]
+    app_id = top_match["application_id"]
+
+    # First ensure application is shortlisted
+    client.post(f"/api/applications/{app_id}/shortlist", headers=headers)
+
+    # Admin approves candidate for interview
+    approve_res = client.post(f"/api/applications/{app_id}/approve", headers=headers)
+    assert approve_res.status_code == 200
+    data = approve_res.json()
+    assert data["status"] == "Approved"
+    assert data["notification_sent"] is True
+    assert "approved for an interview" in data["notification_message"].lower()
+
+
+def test_scenario_10_admin_schedules_interview():
+    """Scenario #10 (PDF): Admin schedules an interview -> Interview details are saved and visible to the candidate."""
     admin_token = get_token("test_admin@test.com")
     headers = {"Authorization": f"Bearer {admin_token}"}
 
@@ -69,9 +96,6 @@ def test_scenario_9_admin_schedules_interview():
     top_match = matches[0]
     app_id = top_match["application_id"]
     candidate_id = top_match["candidate_id"]
-
-    # Shortlist candidate first
-    client.post(f"/api/applications/{app_id}/shortlist", headers=headers)
 
     # Fetch available interviewers
     interviewers_res = client.get("/api/interviews/interviewers", headers=headers)
@@ -106,8 +130,8 @@ def test_scenario_9_admin_schedules_interview():
     assert interview["duration_minutes"] == 60
 
 
-def test_scenario_10_interviewer_submits_5_dimension_feedback():
-    """Scenario #10: Interviewer conducts interview and submits 5-dimension feedback -> Ratings saved, status completed."""
+def test_scenario_11_interviewer_submits_feedback():
+    """Scenario #11 (PDF): Interviewer submits feedback -> Feedback is stored and visible to authorized admins."""
     interviewer_token = get_token("test_interviewer@test.com", "InterviewerPass123!")
     headers = {"Authorization": f"Bearer {interviewer_token}"}
 
@@ -153,8 +177,8 @@ def test_scenario_10_interviewer_submits_5_dimension_feedback():
     assert "Outstanding candidate" in interview["feedback_remarks"]
 
 
-def test_scenario_11_candidate_views_interview_status():
-    """Scenario #11: Candidate views application & interview status -> Complete timeline and details displayed."""
+def test_scenario_11b_candidate_views_interview_status():
+    """Scenario #10/11: Candidate views application & interview status -> Complete timeline and details displayed."""
     admin_token = get_token("test_admin@test.com")
     admin_headers = {"Authorization": f"Bearer {admin_token}"}
 

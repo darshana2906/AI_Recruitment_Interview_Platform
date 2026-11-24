@@ -1,0 +1,379 @@
+{
+  "info": {
+    "_postman_id": "recruitment-platform-v1",
+    "name": "AI-Powered Recruitment & Interview Management Platform API",
+    "description": "Comprehensive Postman collection for all REST endpoints across Candidate Portal, Admin Recruitment Console, and Interviewer Workspace.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication & RBAC",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            }
+          }
+        },
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"new_candidate@test.com\",\n  \"password\": \"SecurePass123!\",\n  \"full_name\": \"Candidate Demo\",\n  \"role\": \"candidate\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login (Get JWT Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.access_token) {",
+                  "    pm.collectionVariables.set('token', jsonData.access_token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@recruitment.ai\",\n  \"password\": \"AdminPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Authenticated User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Candidate Profiles & Ingestion",
+      "item": [
+        {
+          "name": "Upload Single Resume (Scenario #1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "sample_data/resumes/alex_turner_fullstack.docx"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates/upload-resume",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "candidates", "upload-resume"]
+            }
+          }
+        },
+        {
+          "name": "Bulk Upload Resumes (Scenario #2 & #3)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "files", "type": "file", "src": "sample_data/resumes/alex_turner_fullstack.docx" },
+                { "key": "files", "type": "file", "src": "sample_data/resumes/priya_patel_aiml.pdf" },
+                { "key": "files", "type": "file", "src": "sample_data/resumes/maria_garcia_frontend.pdf" },
+                { "key": "files", "type": "file", "src": "sample_data/resumes/david_kim_devops.docx" },
+                { "key": "files", "type": "file", "src": "sample_data/resumes/james_wilson_junior.docx" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates/bulk-upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "candidates", "bulk-upload"]
+            }
+          }
+        },
+        {
+          "name": "Natural Language Semantic Search (Scenario #6)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"Machine learning engineer with PyTorch and NLP experience\",\n  \"top_k\": 5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates/search-semantic",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "candidates", "search-semantic"]
+            }
+          }
+        },
+        {
+          "name": "Get Candidate Profile (Scenario #7 & #12)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "candidates", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Job Requisitions & 5-Factor Matching",
+      "item": [
+        {
+          "name": "Create Job Requisition (Scenario #4)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Full-Stack Software Engineer\",\n  \"description\": \"Architect scalable microservices and modern React frontends.\",\n  \"required_skills\": [\"React\", \"Node.js\", \"Python\", \"SQL\", \"Docker\"],\n  \"preferred_skills\": [\"AWS\", \"Kubernetes\", \"GraphQL\"],\n  \"min_experience\": 4.0,\n  \"max_experience\": 8.0,\n  \"education_requirement\": \"Bachelor's Degree\",\n  \"location\": \"San Francisco, CA (Hybrid)\",\n  \"employment_type\": \"Full-time\",\n  \"status\": \"Active\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "jobs", ""]
+            }
+          }
+        },
+        {
+          "name": "List All Jobs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "jobs", ""]
+            }
+          }
+        },
+        {
+          "name": "Execute 5-Factor Hybrid Matching (Scenario #5)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/1/match",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "jobs", "1", "match"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Applications, Shortlisting & Approvals",
+      "item": [
+        {
+          "name": "Shortlist Candidate (Scenario #8)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/1/shortlist",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applications", "1", "shortlist"]
+            }
+          }
+        },
+        {
+          "name": "Approve Candidate for Interview (Scenario #9)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/1/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applications", "1", "approve"]
+            }
+          }
+        },
+        {
+          "name": "Human-in-the-Loop Score Override",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"override_score\": 90.0,\n  \"override_reason\": \"Candidate possesses exceptional architectural knowledge and open-source contributions verified during preliminary screening.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/1/override",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applications", "1", "override"]
+            }
+          }
+        },
+        {
+          "name": "Export Shortlist (CSV Format)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/job/1/export-shortlist?format=csv",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applications", "job", "1", "export-shortlist"],
+              "query": [
+                { "key": "format", "value": "csv" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Candidate Application Pipeline & Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/my-applications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applications", "my-applications"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Interview Scheduling & Evaluation",
+      "item": [
+        {
+          "name": "Schedule Interview (Scenario #10)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"application_id\": 1,\n  \"interviewer_id\": 2,\n  \"scheduled_at\": \"2026-11-25T14:00:00Z\",\n  \"duration_minutes\": 60,\n  \"meeting_link\": \"https://meet.google.com/rec-demo-round1\",\n  \"notes\": \"Technical Architecture and Concurrency Round\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/interviews/schedule",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "interviews", "schedule"]
+            }
+          }
+        },
+        {
+          "name": "Submit 5-Dimension Feedback (Scenario #11)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"technical_rating\": 4.5,\n  \"communication_rating\": 4.0,\n  \"problem_solving_rating\": 5.0,\n  \"culture_fit_rating\": 4.5,\n  \"overall_recommendation\": \"Strong Hire\",\n  \"feedback_remarks\": \"Outstanding candidate. Demonstrated deep mastery of asynchronous systems and production-grade software patterns.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/interviews/1/feedback",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "interviews", "1", "feedback"]
+            }
+          }
+        },
+        {
+          "name": "Candidate Views Scheduled Interviews (Scenario #10/11)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/interviews/my-interviews",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "interviews", "my-interviews"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

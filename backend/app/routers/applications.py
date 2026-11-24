@@ -114,6 +114,43 @@ def shortlist_candidate(
     }
 
 
+@router.post("/{app_id}/approve", status_code=status.HTTP_200_OK)
+def approve_candidate_for_interview(
+    app_id: int,
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """Admin approves a candidate for an interview.
+
+    (Scenario #9: Admin approves a candidate -> Candidate receives an interview notification)
+    Updates application status to 'Approved' and triggers an interview invitation notification.
+    """
+    app = db.query(Application).filter(Application.id == app_id).first()
+    if not app:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Application #{app_id} not found."
+        )
+
+    app.status = "Approved"
+    db.commit()
+    db.refresh(app)
+
+    logger.info(
+        f"Admin #{current_user.id} approved application #{app.id} (Candidate #{app.candidate_id}) for job '{app.job.title}'."
+    )
+
+    return {
+        "message": f"Candidate #{app.candidate_id} has been approved for an interview for job '{app.job.title}'. Candidate has been notified.",
+        "application_id": app.id,
+        "candidate_id": app.candidate_id,
+        "job_title": app.job.title,
+        "status": app.status,
+        "notification_sent": True,
+        "notification_message": f"Congratulations! Your application for '{app.job.title}' has been approved for an interview. An evaluator will schedule your session shortly."
+    }
+
+
 @router.post("/{app_id}/override", status_code=status.HTTP_200_OK)
 def override_ai_score(
     app_id: int,
@@ -253,6 +290,12 @@ def get_my_applications(
     apps = db.query(Application).filter(Application.candidate_id == cand_profile.id).all()
     results = []
     for a in apps:
+        notification_msg = None
+        if a.status == "Approved":
+            notification_msg = f"Congratulations! Your application for '{a.job.title if a.job else 'Position'}' has been approved for an interview. Our recruitment team will schedule your evaluation session shortly."
+        elif a.status == "Interview Scheduled":
+            notification_msg = f"An interview has been scheduled for '{a.job.title if a.job else 'Position'}'. Please check your Scheduled Interview Invitations below."
+
         results.append({
             "id": a.id,
             "job_id": a.job_id,
@@ -261,7 +304,8 @@ def get_my_applications(
             "status": a.status,
             "applied_at": a.created_at.isoformat() if a.created_at else None,
             "matched_skills": a.matched_skills or [],
-            "missing_skills": a.missing_skills or []
+            "missing_skills": a.missing_skills or [],
+            "notification": notification_msg
         })
     return results
 

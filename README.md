@@ -112,18 +112,18 @@ Every scenario from the Tier 2 Assessment document was implemented and verified 
 
 | # | Assessment Scenario | Input / Action | Verified System Behavior | Status |
 | :-: | :--- | :--- | :--- | :-: |
-| **1** | Candidate Uploads Resume | Upload valid PDF/DOCX resume | PyMuPDF/python-docx extracts text; Gemini extracts structured entities; profile displayed for review. | **VERIFIED (PASS)** |
-| **2** | Admin Uploads 5 Resumes in Bulk | Bulk upload 5 PDF/DOCX files | Batch ingestion processes all files; duplicate detection prevents duplicates; vectors indexed. | **VERIFIED (PASS)** |
-| **3** | Admin Uploads Invalid File | Upload non-PDF/DOCX file (e.g. `.exe` or `.txt`) | Backend rejects with HTTP 400 Bad Request; shows descriptive error message. | **VERIFIED (PASS)** |
+| **1** | Candidate Uploads Resume | Upload valid PDF/DOCX resume | PyMuPDF/python-docx extracts text; Gemini extracts structured entities; profile created and displayed for review. | **VERIFIED (PASS)** |
+| **2** | Admin Uploads 5 Resumes in Bulk | Bulk upload 5 PDF/DOCX files | Batch ingestion processes all files individually; duplicate detection prevents duplicates; vectors indexed. | **VERIFIED (PASS)** |
+| **3** | Admin Uploads Invalid File | Upload non-PDF/DOCX file (e.g. `.exe` or corrupted file) | Backend rejects with HTTP 400 Bad Request; isolates error without affecting valid uploads. | **VERIFIED (PASS)** |
 | **4** | Admin Creates Job Position | Create requisition with required & preferred skills | Requisition saved in SQLite; status Active; visible across matching and candidate portal. | **VERIFIED (PASS)** |
 | **5** | Admin Selects Job for Matching | Execute AI matching engine for requisition | Computes 5-factor hybrid scores (0-100); sorts descending; provides skill gap analysis & XAI rationale. | **VERIFIED (PASS)** |
 | **6** | Admin Searches via Natural Language | Query *"machine learning engineer with python"* | Generates dense query vector; computes cosine similarity; ranks candidates semantically. | **VERIFIED (PASS)** |
 | **7** | Admin Opens Candidate Profile | Click profile details on candidate card | Modal opens showing contact info, work history, education, skills, and resume metadata. | **VERIFIED (PASS)** |
-| **8** | Admin Shortlists Candidate | Click "Shortlist Candidate" | Application status updates to `Shortlisted`; enables interview scheduling and export. | **VERIFIED (PASS)** |
-| **9** | Admin Schedules Interview | Select candidate, date/time, interviewer, meet link | Interview created with `Scheduled` status; notifications and calendar cards populated. | **VERIFIED (PASS)** |
-| **10** | Interviewer Conducts Interview | Evaluator submits 5-dimension ratings & remarks | Ratings (1-5) and recommendation saved; interview `Completed`; application status updated. | **VERIFIED (PASS)** |
-| **11** | Candidate Views Interview Status | Candidate logs in to portal | Dashboard displays upcoming interview card, date/time, evaluator name, and Google Meet link. | **VERIFIED (PASS)** |
-| **12** | RBAC Authorization Guarding | Candidate attempts to call Admin API (`/api/jobs/`) | Request blocked with **HTTP 403 Forbidden**; interviewers and candidates isolated. | **VERIFIED (PASS)** |
+| **8** | Admin Shortlists Candidate | Click "Shortlist Candidate" | Application status updates to `Shortlisted`; enables CSV export and interview workflow. | **VERIFIED (PASS)** |
+| **9** | Admin Approves Candidate | Click "Approve for Interview" | Application status updates to `Approved`; candidate receives interview invitation notification. | **VERIFIED (PASS)** |
+| **10** | Admin Schedules Interview | Select candidate, date/time, interviewer, meet link | Interview created with `Scheduled` status; meeting link saved and visible to candidate. | **VERIFIED (PASS)** |
+| **11** | Interviewer Conducts Interview | Evaluator submits 5-dimension ratings & remarks | Ratings (1-5) and recommendation saved; interview `Completed`; visible to authorized admins. | **VERIFIED (PASS)** |
+| **12** | Candidate Attempts Access to Other Profile | Candidate attempts `GET /api/candidates/{other_id}` | Request blocked with **HTTP 403 Forbidden**; candidate profiles strictly isolated. | **VERIFIED (PASS)** |
 
 ---
 
@@ -221,7 +221,7 @@ The platform automatically seeds initial administrator, interviewer, and candida
 
 ## 7. Automated Test Suite Execution
 
-All 28 tests across authentication, RBAC, document extraction, 5-factor matching, semantic search, and interview workflows pass with 100% success:
+All 30 automated tests across authentication, RBAC, document extraction, 5-factor matching, semantic search, and interview workflows pass with 100% success:
 
 ```powershell
 cd backend
@@ -232,45 +232,50 @@ pytest -v tests/
 
 ### Test Results Summary:
 ```text
-tests/test_auth_rbac.py::test_health_check PASSED
-tests/test_auth_rbac.py::test_user_registration_success PASSED
-tests/test_auth_rbac.py::test_user_registration_duplicate_email PASSED
-tests/test_auth_rbac.py::test_login_success PASSED
-tests/test_auth_rbac.py::test_login_invalid_password PASSED
-tests/test_auth_rbac.py::test_login_nonexistent_email PASSED
-tests/test_auth_rbac.py::test_unauthenticated_protected_route PASSED
-tests/test_auth_rbac.py::test_authenticated_profile_access PASSED
-tests/test_auth_rbac.py::test_rbac_candidate_denied_admin_endpoint PASSED
-tests/test_auth_rbac.py::test_rbac_admin_allowed_admin_endpoint PASSED
-tests/test_auth_rbac.py::test_rbac_interviewer_portal_access PASSED
-tests/test_interviews.py::test_scenario_9_admin_schedules_interview PASSED
-tests/test_interviews.py::test_scenario_10_interviewer_submits_5_dimension_feedback PASSED
-tests/test_interviews.py::test_scenario_11_candidate_views_interview_status PASSED
-tests/test_interviews.py::test_shortlist_export_csv_and_json PASSED
-tests/test_interviews.py::test_reschedule_and_cancel_interview PASSED
-tests/test_matching_jobs.py::test_scenario_4_admin_creates_job PASSED
-tests/test_matching_jobs.py::test_scenario_5_admin_selects_job_for_matching PASSED
-tests/test_matching_jobs.py::test_scenario_6_admin_searches_using_natural_language PASSED
-tests/test_matching_jobs.py::test_scenario_7_admin_opens_candidate_profile PASSED
-tests/test_matching_jobs.py::test_scenario_8_admin_shortlists_candidate PASSED
-tests/test_matching_jobs.py::test_human_in_the_loop_score_override PASSED
-tests/test_matching_jobs.py::test_job_crud_update_and_delete PASSED
-tests/test_resume_processing.py::test_scenario_1_candidate_uploads_resume PASSED
-tests/test_resume_processing.py::test_candidate_reviews_and_updates_profile PASSED
-tests/test_resume_processing.py::test_scenario_2_admin_uploads_5_resumes PASSED
-tests/test_resume_processing.py::test_scenario_3_admin_uploads_invalid_file PASSED
-tests/test_resume_processing.py::test_candidate_cannot_access_another_candidates_profile PASSED
+tests/test_auth_rbac.py::test_health_check PASSED                        [  3%]
+tests/test_auth_rbac.py::test_user_registration_success PASSED           [  6%]
+tests/test_auth_rbac.py::test_user_registration_duplicate_email PASSED   [ 10%]
+tests/test_auth_rbac.py::test_login_success PASSED                       [ 13%]
+tests/test_auth_rbac.py::test_login_invalid_password PASSED              [ 16%]
+tests/test_auth_rbac.py::test_login_nonexistent_email PASSED             [ 20%]
+tests/test_auth_rbac.py::test_unauthenticated_protected_route PASSED     [ 23%]
+tests/test_auth_rbac.py::test_authenticated_profile_access PASSED         [ 26%]
+tests/test_auth_rbac.py::test_rbac_candidate_denied_admin_endpoint PASSED [ 30%]
+tests/test_auth_rbac.py::test_rbac_admin_allowed_admin_endpoint PASSED   [ 33%]
+tests/test_auth_rbac.py::test_rbac_interviewer_portal_access PASSED     [ 36%]
+tests/test_interviews.py::test_scenario_9_admin_approves_candidate PASSED [ 40%]
+tests/test_interviews.py::test_scenario_10_admin_schedules_interview PASSED [ 43%]
+tests/test_interviews.py::test_scenario_11_interviewer_submits_feedback PASSED [ 46%]
+tests/test_interviews.py::test_scenario_11b_candidate_views_interview_status PASSED [ 50%]
+tests/test_interviews.py::test_shortlist_export_csv_and_json PASSED     [ 53%]
+tests/test_interviews.py::test_reschedule_and_cancel_interview PASSED   [ 56%]
+tests/test_matching_jobs.py::test_scenario_4_admin_creates_job PASSED   [ 60%]
+tests/test_matching_jobs.py::test_scenario_5_admin_selects_job_for_matching PASSED [ 63%]
+tests/test_matching_jobs.py::test_scenario_6_admin_searches_using_natural_language PASSED [ 66%]
+tests/test_matching_jobs.py::test_scenario_7_admin_opens_candidate_profile PASSED [ 70%]
+tests/test_matching_jobs.py::test_scenario_8_admin_shortlists_candidate PASSED [ 73%]
+tests/test_matching_jobs.py::test_human_in_the_loop_score_override PASSED [ 76%]
+tests/test_matching_jobs.py::test_job_crud_update_and_delete PASSED     [ 80%]
+tests/test_matching_jobs.py::test_recruitment_dashboard_7_kpis_stats PASSED [ 83%]
+tests/test_resume_processing.py::test_scenario_1_candidate_uploads_resume PASSED [ 86%]
+tests/test_resume_processing.py::test_candidate_reviews_and_updates_profile PASSED [ 90%]
+tests/test_resume_processing.py::test_scenario_2_admin_uploads_5_resumes PASSED [ 93%]
+tests/test_resume_processing.py::test_scenario_3_admin_uploads_invalid_file PASSED [ 96%]
+tests/test_resume_processing.py::test_candidate_cannot_access_another_candidates_profile PASSED [100%]
 
-============================= 28 passed in 22.02s =============================
+============================= 30 passed in 24.16s =============================
 ```
 
 ---
 
-## 8. Documentation References
+## 8. Documentation References (Section 7 Deliverables)
 
 - [Assessment Test Scenarios Verification Report (12 Scenarios)](docs/TEST_SCENARIOS_RESULTS.md)
 - [Database Entity-Relationship (ER) Diagram](docs/ER_DIAGRAM.md)
 - [5-Factor Hybrid Candidate Matching Methodology](docs/MATCHING_METHODOLOGY.md)
+- [AI Architecture & Technology Choices](docs/AI_ARCHITECTURE_CHOICES.md)
+- [7–10 Minute Demo Video Walkthrough Script](docs/DEMO_VIDEO_SCRIPT.md)
+- [Complete Postman Collection v2.1](docs/postman_collection.json)
 
 ---
 
