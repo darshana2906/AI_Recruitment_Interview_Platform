@@ -15,6 +15,8 @@ from app.schemas.candidate import (
     BulkUploadResponse,
     BulkUploadItemResult,
 )
+from app.schemas.job import SemanticSearchRequest, SemanticSearchResultItem
+from app.services.embedding_service import get_embedding, VectorSearchIndex, cosine_similarity
 from app.core.dependencies import get_current_active_user
 from app.core.rbac import require_admin, require_candidate
 from app.services.document_parser import extract_text_from_file
@@ -339,6 +341,56 @@ async def bulk_upload_resumes(
         duplicates=duplicates,
         results=results
     )
+
+
+@router.post("/search-semantic", response_model=List[SemanticSearchResultItem])
+def search_candidates_semantic(
+    search_req: SemanticSearchRequest,
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """Natural Language Candidate Semantic Search.
+
+    - Embeds free-form natural language query.
+    - Searches vector index (FAISS / dense vector cosine similarity).
+    - Returns ranked candidate profiles matching the semantic intent.
+    (Scenario #6: Admin searches using natural language -> Relevant candidates are retrieved using semantic search)
+    """
+    candidates = db.query(CandidateProfile).all()
+    if not candidates:
+        return []
+
+    # 1. Build Vector Search Index
+    index = VectorSearchIndex(dim=384)
+    for c in candidates:
+        text_corpus = f"{c.full_name} {c.education_level} {c.total_experience_years} years {c.profile_summary} {' '.join(c.skills)}"
+        emb = get_embedding(text_corpus)
+        index.add_candidate(c.id, emb)
+
+    # 2. Embed Query & Search Index
+    query_vector = get_embedding(search_req.query)
+    top_matches = index.search(query_vector, top_k=search_req.top_k)
+
+    # 3. Format Ranked Results
+    cand_dict = {c.id: c for c in candidates}
+    results: List[SemanticSearchResultItem] = []
+
+    for cand_id, score in top_matches:
+        cand = cand_dict.get(cand_id)
+        if cand:
+            results.append(SemanticSearchResultItem(
+                candidate_id=cand.id,
+                candidate_name=cand.full_name,
+                email=cand.email,
+                similarity_score=round(score, 3),
+                similarity_percent=round(score * 100, 1),
+                skills=cand.skills,
+                experience_years=cand.total_experience_years,
+                location=cand.location,
+                summary=cand.profile_summary,
+            ))
+
+    return results
 
 
 @router.get("/", response_model=List[CandidateResponse])
