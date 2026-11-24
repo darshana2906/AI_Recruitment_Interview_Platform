@@ -8,7 +8,7 @@ export const InterviewScheduleModal = ({ isOpen, onClose, application, onSchedul
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('10:00');
   const [durationMinutes, setDurationMinutes] = useState(45);
-  const [meetingLink, setMeetingLink] = useState('https://meet.google.com/rec-ai-interview');
+  const [meetingLink, setMeetingLink] = useState('');
   const [notes, setNotes] = useState('Technical evaluation round: Focus on core algorithms and domain architecture.');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -26,7 +26,9 @@ export const InterviewScheduleModal = ({ isOpen, onClose, application, onSchedul
           const res = await api.get('/interviews/interviewers');
           setInterviewers(res.data);
           if (res.data.length > 0) {
-            setSelectedInterviewerId(res.data[0].id);
+            // Prioritize actual technical evaluator (role='interviewer') over admin
+            const defaultInv = res.data.find((inv) => inv.role === 'interviewer') || res.data[0];
+            setSelectedInterviewerId(defaultInv.id);
           }
         } catch (err) {
           console.error('Failed to load interviewers:', err);
@@ -45,12 +47,17 @@ export const InterviewScheduleModal = ({ isOpen, onClose, application, onSchedul
 
     try {
       const scheduledAtIso = new Date(`${scheduledDate}T${scheduledTime}:00Z`).toISOString();
+      let sanitizedMeetingLink = meetingLink.trim();
+      if (sanitizedMeetingLink && !sanitizedMeetingLink.startsWith('http://') && !sanitizedMeetingLink.startsWith('https://')) {
+        sanitizedMeetingLink = `https://${sanitizedMeetingLink}`;
+      }
+
       const payload = {
         application_id: application.application_id || application.id,
         interviewer_id: selectedInterviewerId ? parseInt(selectedInterviewerId) : null,
         scheduled_at: scheduledAtIso,
         duration_minutes: parseInt(durationMinutes),
-        meeting_link: meetingLink,
+        meeting_link: sanitizedMeetingLink || null,
         notes: notes
       };
 
@@ -173,18 +180,21 @@ export const InterviewScheduleModal = ({ isOpen, onClose, application, onSchedul
 
             <div className="col-span-2">
               <label className="block font-semibold text-slate-700 mb-1">
-                Meeting Video Link *
+                Online Meeting URL (Google Meet / Teams)
               </label>
               <div className="relative">
                 <Video className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
                 <input
-                  type="url"
-                  required
+                  type="text"
+                  placeholder="https://meet.google.com/xxx-yyyy-zzz"
                   value={meetingLink}
                   onChange={(e) => setMeetingLink(e.target.value)}
                   className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-hidden focus:ring-1 focus:ring-[#2563EB]"
                 />
               </div>
+              <p className="text-[10px] text-slate-400 mt-0.5">
+                Paste real meeting link. Evaluator and candidate will join via this URL.
+              </p>
             </div>
           </div>
 

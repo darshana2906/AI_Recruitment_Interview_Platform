@@ -267,18 +267,23 @@ export const CandidateHome = () => {
                     </p>
                   )}
 
-                  {item.meeting_link && (
+                  {item.meeting_link ? (
                     <div className="pt-1">
                       <a
                         href={item.meeting_link}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2563EB] hover:bg-blue-700 text-white font-semibold rounded-lg text-xs transition shadow-xs cursor-pointer"
                       >
                         <Video className="w-3.5 h-3.5" />
-                        <span>Join Video Interview</span>
+                        <span>Join Online Meeting</span>
                         <ExternalLink className="w-3 h-3" />
                       </a>
+                    </div>
+                  ) : (
+                    <div className="pt-1 text-[11px] text-slate-500 italic flex items-center gap-1">
+                      <Video className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Online meeting link will be provided by the recruiting team prior to session.</span>
                     </div>
                   )}
                 </div>

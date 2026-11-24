@@ -3,14 +3,18 @@ from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+BACKEND_DIR = Path(__file__).resolve().parent.parent
+DEFAULT_DB_PATH = BACKEND_DIR / "recruitment.db"
+
+
 class Settings(BaseSettings):
     PORT: int = 8000
     HOST: str = "127.0.0.1"
     DEBUG: bool = True
     ENVIRONMENT: str = "development"
     
-    # SQLite Database
-    DATABASE_URL: str = "sqlite:///./recruitment.db"
+    # SQLite Database (Canonical absolute path to backend/recruitment.db)
+    DATABASE_URL: str = f"sqlite:///{DEFAULT_DB_PATH.as_posix()}"
     
     # JWT Authentication
     SECRET_KEY: str = "dev-secret-key-recruitment-platform-2026-secure-token-hash-32chars"

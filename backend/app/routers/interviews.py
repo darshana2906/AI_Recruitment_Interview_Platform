@@ -34,6 +34,10 @@ def _format_interview_response(interview: Interview) -> dict:
         "candidate_name": cand.full_name if cand else "Unknown",
         "candidate_email": cand.email if cand else "",
         "candidate_phone": cand.phone if cand else None,
+        "candidate_skills": cand.skills if cand else [],
+        "candidate_experience_years": cand.total_experience_years if cand else 0.0,
+        "candidate_education": cand.education_level if cand else None,
+        "candidate_summary": cand.profile_summary if cand else None,
         "interviewer_id": interview.interviewer_id,
         "interviewer_name": interviewer.full_name if interviewer else "Unassigned",
         "interviewer_email": interviewer.email if interviewer else None,
@@ -61,15 +65,19 @@ def list_available_interviewers(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
-    """List all registered interviewers and administrators eligible to conduct interviews."""
+    """List all registered interviewers and administrators eligible to conduct interviews.
+    Orders active technical evaluators (role='interviewer') first.
+    """
     users = db.query(User).filter(
         User.role.in_([UserRole.INTERVIEWER.value, UserRole.ADMIN.value]),
         User.is_active == True
     ).all()
 
+    sorted_users = sorted(users, key=lambda u: (0 if u.role == UserRole.INTERVIEWER.value else 1, u.full_name))
+
     return [
         {"id": u.id, "full_name": u.full_name, "email": u.email, "role": u.role}
-        for u in users
+        for u in sorted_users
     ]
 
 
@@ -105,8 +113,11 @@ def schedule_interview(
         if not interviewer:
             interviewer = current_user
 
-    # Generate default meeting link if not supplied
-    meeting_link = req.meeting_link or f"https://meet.google.com/rec-{app.id}-{app.candidate_id}"
+    # Clean and validate meeting link supplied by recruiter (do not generate fake placeholder links)
+    meeting_link = req.meeting_link.strip() if req.meeting_link else None
+    if meeting_link:
+        if not (meeting_link.startswith("http://") or meeting_link.startswith("https://")):
+            meeting_link = f"https://{meeting_link}"
 
     new_interview = Interview(
         application_id=app.id,
@@ -271,8 +282,11 @@ def reschedule_interview(
     interview.scheduled_at = req.scheduled_at
     if req.duration_minutes:
         interview.duration_minutes = req.duration_minutes
-    if req.meeting_link:
-        interview.meeting_link = req.meeting_link
+    if req.meeting_link is not None:
+        clean_link = req.meeting_link.strip() if req.meeting_link else None
+        if clean_link and not (clean_link.startswith("http://") or clean_link.startswith("https://")):
+            clean_link = f"https://{clean_link}"
+        interview.meeting_link = clean_link
     if req.notes:
         interview.notes = req.notes
     interview.status = "Rescheduled"

@@ -95,10 +95,17 @@ export const InterviewsManagement = () => {
         `${rescheduleModal.scheduledDate}T${rescheduleModal.scheduledTime}:00Z`
       ).toISOString();
 
+      const cleanMeetingLink = rescheduleModal.meetingLink.trim();
+      const sanitizedLink = cleanMeetingLink
+        ? cleanMeetingLink.startsWith('http://') || cleanMeetingLink.startsWith('https://')
+          ? cleanMeetingLink
+          : `https://${cleanMeetingLink}`
+        : null;
+
       await api.put(`/interviews/${rescheduleModal.interview.id}/reschedule`, {
         scheduled_at: isoTimestamp,
         duration_minutes: parseInt(rescheduleModal.durationMinutes),
-        meeting_link: rescheduleModal.meetingLink,
+        meeting_link: sanitizedLink,
         notes: rescheduleModal.notes
       });
 
@@ -282,17 +289,21 @@ export const InterviewsManagement = () => {
                         <span>{dateStr} at {timeStr}</span>
                         <span className="text-[11px] font-normal text-slate-500">({interview.duration_minutes} min)</span>
                       </div>
-                      {interview.meeting_link && (
+                      {interview.meeting_link ? (
                         <a
                           href={interview.meeting_link}
                           target="_blank"
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#2563EB] hover:underline"
                         >
                           <Video className="w-3.5 h-3.5 text-blue-600" />
                           <span>Join Meeting Session</span>
                           <ExternalLink className="w-3 h-3" />
                         </a>
+                      ) : (
+                        <span className="text-[11px] text-slate-400 italic flex items-center gap-1">
+                          <Video className="w-3.5 h-3.5 text-slate-300" /> No meeting link
+                        </span>
                       )}
                     </div>
                   </div>
