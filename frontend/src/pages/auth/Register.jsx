@@ -49,29 +49,38 @@ export const Register = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-[#F8FAFC]">
-      <div className="max-w-md w-full space-y-6 bg-white p-8 rounded-xl shadow-xs border border-slate-200">
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-[#060A13] relative overflow-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
+      {/* Background Volumetric Glow & Light Beam */}
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+        <div className="aurora-beam" />
+        <div className="absolute -top-24 left-1/3 w-[550px] h-[350px] bg-sky-500/15 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-10 right-1/4 w-[400px] h-[300px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
+      </div>
+
+      <div className="relative max-w-md w-full space-y-6 bg-[#0B1220]/80 backdrop-blur-xl p-8 rounded-2xl shadow-[0_0_50px_rgba(56,189,248,0.12)] border border-slate-800/90">
         {/* Header Branding */}
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-11 h-11 rounded-lg bg-[#14243A] text-white mb-3 shadow-xs">
-            <Briefcase className="w-5 h-5 text-blue-400" />
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 via-sky-500 to-cyan-400 text-white mb-3 shadow-[0_0_20px_rgba(56,189,248,0.35)]">
+            <Briefcase className="w-6 h-6" />
           </div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Create an Account</h2>
-          <p className="text-xs text-slate-500 mt-1">
+          <h2 className="text-2xl font-extrabold text-white tracking-tight">
+            Create an <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-cyan-300 to-blue-400">Account</span>
+          </h2>
+          <p className="text-xs text-slate-400 mt-1.5 font-normal">
             Join the RecruitAI Enterprise Platform
           </p>
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+          <div className="p-3 bg-red-950/60 border border-red-800/60 rounded-xl text-red-300 text-xs flex items-start gap-2 shadow-xs">
+            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-red-400" />
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block font-semibold text-slate-700 uppercase tracking-wider text-[11px] mb-1.5">
+            <label className="block font-semibold text-slate-300 uppercase tracking-wider text-[11px] mb-1.5">
               Full Name
             </label>
             <input
@@ -80,12 +89,12 @@ export const Register = () => {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="e.g. Sarah Jenkins"
-              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] transition"
+              className="w-full px-3.5 py-2.5 bg-[#060A13]/90 border border-slate-700/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-hidden focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition shadow-inner"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 uppercase tracking-wider text-[11px] mb-1.5">
+            <label className="block font-semibold text-slate-300 uppercase tracking-wider text-[11px] mb-1.5">
               Email Address
             </label>
             <input
@@ -94,27 +103,27 @@ export const Register = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="e.g. sarah@example.com"
-              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] transition"
+              className="w-full px-3.5 py-2.5 bg-[#060A13]/90 border border-slate-700/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-hidden focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition shadow-inner"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 uppercase tracking-wider text-[11px] mb-1.5">
+            <label className="block font-semibold text-slate-300 uppercase tracking-wider text-[11px] mb-1.5">
               Select Role
             </label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] transition"
+              className="w-full px-3.5 py-2.5 bg-[#060A13]/90 border border-slate-700/80 rounded-xl text-xs text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition shadow-inner"
             >
-              <option value="candidate">Candidate (Job Seeker & Applicant)</option>
-              <option value="interviewer">Interviewer (Technical Evaluator)</option>
-              <option value="admin">Administrator (Recruiter & Talent Lead)</option>
+              <option value="candidate" className="bg-[#0B1220] text-slate-100">Candidate (Job Seeker & Applicant)</option>
+              <option value="interviewer" className="bg-[#0B1220] text-slate-100">Interviewer (Technical Evaluator)</option>
+              <option value="admin" className="bg-[#0B1220] text-slate-100">Administrator (Recruiter & Talent Lead)</option>
             </select>
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 uppercase tracking-wider text-[11px] mb-1.5">
+            <label className="block font-semibold text-slate-300 uppercase tracking-wider text-[11px] mb-1.5">
               Password
             </label>
             <input
@@ -123,12 +132,12 @@ export const Register = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Minimum 6 characters"
-              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] transition"
+              className="w-full px-3.5 py-2.5 bg-[#060A13]/90 border border-slate-700/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-hidden focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition shadow-inner"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 uppercase tracking-wider text-[11px] mb-1.5">
+            <label className="block font-semibold text-slate-300 uppercase tracking-wider text-[11px] mb-1.5">
               Confirm Password
             </label>
             <input
@@ -137,14 +146,14 @@ export const Register = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Re-enter password"
-              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] transition"
+              className="w-full px-3.5 py-2.5 bg-[#060A13]/90 border border-slate-700/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-hidden focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition shadow-inner"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 px-4 bg-[#2563EB] hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold rounded-lg text-xs transition shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-2.5 px-4 bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 hover:from-blue-500 hover:to-cyan-300 disabled:opacity-50 text-white font-semibold rounded-xl text-xs transition shadow-[0_0_20px_rgba(56,189,248,0.35)] hover:shadow-[0_0_25px_rgba(56,189,248,0.5)] flex items-center justify-center gap-2 cursor-pointer mt-2"
           >
             {loading ? (
               <>
@@ -157,9 +166,9 @@ export const Register = () => {
           </button>
         </form>
 
-        <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
+        <div className="text-center text-xs text-slate-400 pt-3 border-t border-slate-800/80">
           Already have an account?{' '}
-          <Link to="/login" className="text-[#2563EB] hover:text-blue-700 font-semibold">
+          <Link to="/login" className="text-sky-400 hover:text-sky-300 font-semibold transition ml-1">
             Sign In here
           </Link>
         </div>
