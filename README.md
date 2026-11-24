@@ -279,8 +279,8 @@ tests/test_resume_processing.py::test_candidate_cannot_access_another_candidates
 
 ---
 
-## 9. Strict Project Isolation Statement
+## 9. Security & Project Isolation Compliance
 
-In accordance with strict working instructions:
-- The external project **Fergusson College Placement Portal** was **NEVER** opened, inspected, read, modified, or accessed in any way.
-- This platform operates in complete isolation with its own dedicated repository, virtual environment, dependencies, database, and configuration.
+- This platform operates in complete self-contained isolation with its own dedicated repository, virtual environment, dependencies, database, and configuration.
+- All secrets, environment variables (`.env`), database files (`*.db`), and uploaded resumes (`uploads/`) are strictly excluded from version control via `.gitignore`.
+- Only sanitized `.env.example` templates and fictional test artifacts are tracked.
