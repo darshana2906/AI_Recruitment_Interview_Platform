@@ -9,6 +9,8 @@ import {
   FileText,
   Menu,
   X,
+  ChevronRight,
+  ExternalLink,
   ArrowRight
 } from 'lucide-react';
 
@@ -34,20 +36,6 @@ export const Navbar = () => {
       }
     }
     navigate(`/#${sectionId}`);
-  };
-
-  const getDashboardRoute = () => {
-    if (!user) return '/login';
-    if (user.role === 'admin') return '/admin';
-    if (user.role === 'interviewer') return '/interviewer';
-    return '/candidate';
-  };
-
-  const getDashboardLabel = () => {
-    if (!user) return 'Dashboard';
-    if (user.role === 'admin') return 'Admin Dashboard';
-    if (user.role === 'interviewer') return 'Interviewer Portal';
-    return 'Candidate Portal';
   };
 
   const getRoleBadge = (role) => {
@@ -76,7 +64,7 @@ export const Navbar = () => {
   };
 
   return (
-    <header className="bg-[#14243A] text-white sticky top-0 z-50 border-b border-slate-800 shadow-md">
+    <header className="bg-[#14243A] text-white sticky top-0 z-50 border-b border-slate-800 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Logo & Brand */}
@@ -90,50 +78,80 @@ export const Navbar = () => {
                   RecruitAI
                 </span>
                 <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest block">
-                  AI Recruitment Platform
+                  Enterprise Platform
                 </span>
               </div>
             </Link>
 
-            {/* Desktop Navigation Links: Home, Features, About */}
-            <nav className="hidden md:flex items-center space-x-1 pl-4 border-l border-slate-700/60 text-xs font-medium">
+            {/* Desktop Navigation Links */}
+            <nav className="hidden lg:flex items-center space-x-1 pl-4 border-l border-slate-700/60 text-xs">
               <button
                 onClick={() => handleNavClick('top')}
-                className={`px-3 py-1.5 rounded-md transition cursor-pointer ${
-                  location.pathname === '/' ? 'text-white font-semibold bg-white/10' : 'text-slate-300 hover:text-white hover:bg-white/5'
+                className={`px-3 py-1.5 rounded-md font-medium transition cursor-pointer ${
+                  location.pathname === '/' ? 'text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5'
                 }`}
               >
                 Home
               </button>
               <button
                 onClick={() => handleNavClick('features')}
-                className="px-3 py-1.5 rounded-md text-slate-300 hover:text-white hover:bg-white/5 transition cursor-pointer"
+                className="px-3 py-1.5 rounded-md font-medium text-slate-300 hover:text-white hover:bg-white/5 transition cursor-pointer"
               >
                 Features
               </button>
               <button
+                onClick={() => handleNavClick('how-it-works')}
+                className="px-3 py-1.5 rounded-md font-medium text-slate-300 hover:text-white hover:bg-white/5 transition cursor-pointer"
+              >
+                How It Works
+              </button>
+              <button
                 onClick={() => handleNavClick('about')}
-                className="px-3 py-1.5 rounded-md text-slate-300 hover:text-white hover:bg-white/5 transition cursor-pointer"
+                className="px-3 py-1.5 rounded-md font-medium text-slate-300 hover:text-white hover:bg-white/5 transition cursor-pointer"
               >
                 About
+              </button>
+              <button
+                onClick={() => handleNavClick('contact')}
+                className="px-3 py-1.5 rounded-md font-medium text-slate-300 hover:text-white hover:bg-white/5 transition cursor-pointer"
+              >
+                Contact
               </button>
 
               {/* Direct Workspace link for Authenticated Users */}
               {isAuthenticated && (
-                <div className="pl-3 border-l border-slate-700/60 flex items-center">
-                  <Link
-                    to={getDashboardRoute()}
-                    className="px-3 py-1.5 rounded-md font-semibold bg-[#2563EB]/30 text-blue-200 border border-blue-500/40 hover:bg-[#2563EB]/50 transition"
-                  >
-                    {getDashboardLabel()}
-                  </Link>
+                <div className="pl-3 border-l border-slate-700/60 flex items-center gap-1.5">
+                  {user?.role === 'candidate' && (
+                    <Link
+                      to="/candidate"
+                      className="px-3 py-1.5 rounded-md font-semibold bg-blue-600/30 text-blue-200 border border-blue-500/40 hover:bg-blue-600/40 transition"
+                    >
+                      Candidate Portal
+                    </Link>
+                  )}
+                  {user?.role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      className="px-3 py-1.5 rounded-md font-semibold bg-blue-600/30 text-blue-200 border border-blue-500/40 hover:bg-blue-600/40 transition"
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  {user?.role === 'interviewer' && (
+                    <Link
+                      to="/interviewer"
+                      className="px-3 py-1.5 rounded-md font-semibold bg-blue-600/30 text-blue-200 border border-blue-500/40 hover:bg-blue-600/40 transition"
+                    >
+                      Interviewer Portal
+                    </Link>
+                  )}
                 </div>
               )}
             </nav>
           </div>
 
           {/* Desktop Right Section: User & Auth Buttons */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
                 <div className="text-right">
@@ -155,15 +173,15 @@ export const Navbar = () => {
               <div className="flex items-center gap-2">
                 <Link
                   to="/login"
-                  className="px-3.5 py-1.5 text-xs font-semibold text-slate-200 hover:text-white hover:bg-slate-800 rounded-md transition"
+                  className="px-3.5 py-1.5 text-xs font-semibold text-slate-200 hover:text-white hover:bg-slate-800 rounded-md transition border border-transparent"
                 >
-                  Login
+                  Sign In
                 </Link>
                 <Link
                   to="/register"
                   className="px-4 py-1.5 text-xs font-semibold text-white bg-[#2563EB] hover:bg-blue-600 rounded-md transition shadow-xs flex items-center gap-1"
                 >
-                  <span>Register</span>
+                  <span>Get Started</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -171,7 +189,7 @@ export const Navbar = () => {
           </div>
 
           {/* Mobile Menu Toggle Button */}
-          <div className="flex md:hidden items-center">
+          <div className="flex lg:hidden items-center">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-md text-slate-300 hover:text-white hover:bg-slate-800 focus:outline-hidden"
@@ -185,26 +203,38 @@ export const Navbar = () => {
 
       {/* Mobile Navigation Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#0D1826] border-b border-slate-800 px-4 pt-3 pb-5 space-y-3">
-          {/* Public Navigation Links: Home, Features, About */}
-          <div className="space-y-1 pb-3 border-b border-slate-800 text-xs font-medium">
+        <div className="lg:hidden bg-[#0D1826] border-b border-slate-800 px-4 pt-3 pb-5 space-y-3">
+          {/* Public Navigation Links */}
+          <div className="space-y-1 pb-3 border-b border-slate-800 text-xs">
             <button
               onClick={() => handleNavClick('top')}
-              className="w-full text-left px-3 py-2 rounded-md text-slate-200 hover:bg-slate-800 transition"
+              className="w-full text-left px-3 py-2 rounded-md font-medium text-slate-200 hover:bg-slate-800 transition"
             >
               Home
             </button>
             <button
               onClick={() => handleNavClick('features')}
-              className="w-full text-left px-3 py-2 rounded-md text-slate-200 hover:bg-slate-800 transition"
+              className="w-full text-left px-3 py-2 rounded-md font-medium text-slate-200 hover:bg-slate-800 transition"
             >
               Features
             </button>
             <button
-              onClick={() => handleNavClick('about')}
-              className="w-full text-left px-3 py-2 rounded-md text-slate-200 hover:bg-slate-800 transition"
+              onClick={() => handleNavClick('how-it-works')}
+              className="w-full text-left px-3 py-2 rounded-md font-medium text-slate-200 hover:bg-slate-800 transition"
             >
-              About
+              How It Works
+            </button>
+            <button
+              onClick={() => handleNavClick('about')}
+              className="w-full text-left px-3 py-2 rounded-md font-medium text-slate-200 hover:bg-slate-800 transition"
+            >
+              About Platform
+            </button>
+            <button
+              onClick={() => handleNavClick('contact')}
+              className="w-full text-left px-3 py-2 rounded-md font-medium text-slate-200 hover:bg-slate-800 transition"
+            >
+              Contact
             </button>
           </div>
 
@@ -221,13 +251,33 @@ export const Navbar = () => {
 
               {/* Direct Workspace Link */}
               <div className="pt-1">
-                <Link
-                  to={getDashboardRoute()}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block px-3 py-2 rounded-md font-semibold text-blue-300 bg-blue-900/30 border border-blue-800"
-                >
-                  Go to {getDashboardLabel()}
-                </Link>
+                {user?.role === 'candidate' && (
+                  <Link
+                    to="/candidate"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 rounded-md font-semibold text-blue-300 bg-blue-900/30 border border-blue-800"
+                  >
+                    Go to Candidate Portal
+                  </Link>
+                )}
+                {user?.role === 'admin' && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 rounded-md font-semibold text-blue-300 bg-blue-900/30 border border-blue-800"
+                  >
+                    Go to Admin Dashboard
+                  </Link>
+                )}
+                {user?.role === 'interviewer' && (
+                  <Link
+                    to="/interviewer"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 rounded-md font-semibold text-blue-300 bg-blue-900/30 border border-blue-800"
+                  >
+                    Go to Interviewer Portal
+                  </Link>
+                )}
               </div>
 
               <div className="pt-2 border-t border-slate-800">
@@ -247,14 +297,14 @@ export const Navbar = () => {
                 onClick={() => setMobileMenuOpen(false)}
                 className="block text-center px-4 py-2 text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 rounded-md transition"
               >
-                Login
+                Sign In
               </Link>
               <Link
                 to="/register"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block text-center px-4 py-2 text-xs font-semibold text-white bg-[#2563EB] hover:bg-blue-600 rounded-md transition shadow-xs"
               >
-                Register
+                Create Account / Get Started
               </Link>
             </div>
           )}

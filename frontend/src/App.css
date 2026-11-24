@@ -3,67 +3,42 @@ html {
   scroll-behavior: smooth;
 }
 
-/* ==========================================================================
-   Hero Dark Gradient & Visual Graphic
-   ========================================================================== */
-.hero-gradient-dark {
-  background: radial-gradient(circle at 80% 20%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
-              radial-gradient(circle at 20% 80%, rgba(79, 70, 229, 0.2) 0%, transparent 50%),
-              linear-gradient(135deg, #14243A 0%, #161F38 45%, #1E1B4B 100%);
+/* Landing Page Card Hover Elevations */
+.landing-feature-card {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
 }
 
-.ai-pulse-ring {
-  box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4);
-  animation: pulseGlow 2.5s infinite;
+.landing-feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+  border-color: #CBD5E1;
 }
 
-@keyframes pulseGlow {
+/* Sub-card glow and subtle accents */
+.landing-step-card {
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+.landing-step-card:hover {
+  border-color: #93C5FD;
+  box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.08);
+}
+
+/* Hero UI Mock preview floating badges */
+.hero-mock-shadow {
+  box-shadow: 0 20px 40px -15px rgba(20, 36, 58, 0.2), 0 0 0 1px rgba(226, 232, 240, 0.8);
+}
+
+.hero-floating-badge {
+  animation: floatSubtle 4s ease-in-out infinite alternate;
+}
+
+@keyframes floatSubtle {
   0% {
-    box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 14px rgba(56, 189, 248, 0);
+    transform: translateY(0px);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(56, 189, 248, 0);
+    transform: translateY(-4px);
   }
-}
-
-.hero-glass-card {
-  background: rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.35);
-}
-
-.hero-node-badge {
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-.hero-node-badge:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(56, 189, 248, 0.5);
-  transform: translateY(-2px);
-}
-
-/* ==========================================================================
-   4 Compact Feature Cards
-   ========================================================================== */
-.feature-card-tint {
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
-              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
-              border-color 0.25s ease;
-}
-
-.feature-card-tint:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px -6px rgba(37, 99, 235, 0.12), 0 4px 8px -4px rgba(15, 23, 42, 0.05);
-}
-
-.bg-features-gradient {
-  background: linear-gradient(180deg, #EEF0FF 0%, #E8F1FF 60%, #F8FAFC 100%);
 }
