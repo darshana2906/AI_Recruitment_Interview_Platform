@@ -1,0 +1,12 @@
+{
+  "name": "ai-recruitment-interview-platform",
+  "version": "1.0.0",
+  "description": "AI-Powered Recruitment & Interview Management Platform",
+  "private": true,
+  "scripts": {
+    "frontend:dev": "npm --prefix frontend run dev",
+    "frontend:build": "npm --prefix frontend run build",
+    "backend:dev": "powershell -Command \"$env:PYTHONPATH='backend'; & 'backend/venv/Scripts/python.exe' -m uvicorn app.main:app --port 8000 --reload\"",
+    "backend:test": "powershell -Command \"$env:PYTHONPATH='backend'; & 'backend/venv/Scripts/pytest.exe' -v backend/tests/test_auth_rbac.py\""
+  }
+}
