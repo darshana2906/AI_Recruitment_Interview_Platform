@@ -22,14 +22,23 @@ export const Login = () => {
 
     try {
       const loggedUser = await login(email, password);
-      if (redirectUrl) {
-        navigate(redirectUrl);
+
+      const isAllowedRedirect = (url, role) => {
+        if (!url || url.includes('/unauthorized') || url.includes('/login')) return false;
+        if (role === 'admin') return true;
+        if (role === 'interviewer') return url.startsWith('/interviewer');
+        if (role === 'candidate') return url.startsWith('/candidate');
+        return false;
+      };
+
+      if (redirectUrl && isAllowedRedirect(redirectUrl, loggedUser.role)) {
+        navigate(redirectUrl, { replace: true });
       } else if (loggedUser.role === 'admin') {
-        navigate('/admin');
+        navigate('/admin', { replace: true });
       } else if (loggedUser.role === 'interviewer') {
-        navigate('/interviewer');
+        navigate('/interviewer', { replace: true });
       } else {
-        navigate('/candidate');
+        navigate('/candidate', { replace: true });
       }
     } catch (err) {
       const msg = err.response?.data?.detail || 'Invalid email or password. Please verify your credentials.';

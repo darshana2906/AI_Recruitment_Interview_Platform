@@ -145,20 +145,19 @@ def apply_to_job(
     match_result = compute_hybrid_matching_score(
         candidate=cand_profile,
         job=job,
-        candidate_embedding=cand_profile.embedding,
         job_embedding=job.embedding
     )
 
     new_app = Application(
         job_id=job.id,
         candidate_id=cand_profile.id,
-        ai_match_score=match_result["overall_score"],
-        score_breakdown=match_result["score_breakdown"],
-        matched_skills=match_result["matched_skills"],
-        missing_skills=match_result["missing_skills"],
-        recommendation_reason=match_result["recommendation_reason"],
-        status="Applied"
+        status="Applied",
+        ai_match_score=float(match_result.get("overall_score", 0.0)),
+        experience_comparison=match_result.get("experience_comparison", ""),
+        ai_recommendation_reason=match_result.get("recommendation_reason", "")
     )
+    new_app.matched_skills = match_result.get("matched_skills", [])
+    new_app.missing_skills = match_result.get("missing_skills", [])
     db.add(new_app)
     db.commit()
     db.refresh(new_app)

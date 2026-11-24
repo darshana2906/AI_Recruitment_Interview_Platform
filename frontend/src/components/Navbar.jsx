@@ -12,7 +12,7 @@ export const Navbar = () => {
   const handleLogout = () => {
     logout();
     setMobileMenuOpen(false);
-    navigate('/login');
+    navigate('/login', { replace: true });
   };
 
   const getRoleBadge = (role) => {
