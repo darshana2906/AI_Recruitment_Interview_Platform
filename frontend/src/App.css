@@ -3,42 +3,42 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Landing Page Card Hover Elevations */
-.landing-feature-card {
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+/* Dark Theme Landing Page Card Hover & Glow Animations */
+.dark-glass-card {
+  background: rgba(11, 18, 32, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.landing-feature-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
-  border-color: #CBD5E1;
+.dark-glass-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 12px 30px -10px rgba(56, 189, 248, 0.18), 0 0 20px rgba(37, 99, 235, 0.12);
+  background: rgba(14, 23, 41, 0.85);
 }
 
-/* Sub-card glow and subtle accents */
+/* Landing step cards */
 .landing-step-card {
   position: relative;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .landing-step-card:hover {
-  border-color: #93C5FD;
-  box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.08);
+  transform: translateY(-2px);
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: 0 8px 25px -5px rgba(56, 189, 248, 0.12);
 }
 
-/* Hero UI Mock preview floating badges */
-.hero-mock-shadow {
-  box-shadow: 0 20px 40px -15px rgba(20, 36, 58, 0.2), 0 0 0 1px rgba(226, 232, 240, 0.8);
-}
-
-.hero-floating-badge {
-  animation: floatSubtle 4s ease-in-out infinite alternate;
-}
-
-@keyframes floatSubtle {
-  0% {
-    transform: translateY(0px);
-  }
-  100% {
-    transform: translateY(-4px);
-  }
+/* Volumetric aurora spotlight beam from top-left */
+.aurora-beam {
+  position: absolute;
+  top: -120px;
+  left: -100px;
+  width: 650px;
+  height: 650px;
+  background: conic-gradient(from 135deg at 15% 15%, rgba(56, 189, 248, 0.22) 0deg, rgba(37, 99, 235, 0.12) 35deg, transparent 75deg);
+  filter: blur(55px);
+  pointer-events: none;
+  opacity: 0.9;
 }
