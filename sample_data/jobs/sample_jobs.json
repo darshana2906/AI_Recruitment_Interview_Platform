@@ -1,0 +1,28 @@
+[
+  {
+    "title": "Senior Full-Stack Software Engineer",
+    "description": "We are seeking an experienced Senior Full-Stack Software Engineer to build resilient distributed web applications. The candidate will design scalable RESTful APIs, architect cloud-native microservices, and build responsive frontend user interfaces.",
+    "required_skills": ["React", "Node.js", "Python", "TypeScript", "SQL", "Docker", "REST APIs"],
+    "preferred_skills": ["AWS", "Redis", "GraphQL", "Kubernetes", "CI/CD"],
+    "min_experience": 4.0,
+    "max_experience": 8.0,
+    "education_requirement": "Bachelor's Degree in Computer Science or related field",
+    "location": "San Francisco, CA (Hybrid)",
+    "employment_type": "Full-time",
+    "deadline": "2026-12-31",
+    "status": "Active"
+  },
+  {
+    "title": "AI / Machine Learning Engineer",
+    "description": "Looking for an innovative AI/ML Engineer to implement modern Generative AI, LLM fine-tuning, retrieval-augmented generation (RAG), and vector search pipelines.",
+    "required_skills": ["Python", "PyTorch", "NLP", "Machine Learning", "Transformers", "FastAPI"],
+    "preferred_skills": ["FAISS", "LangChain", "Vector Databases", "Docker", "Google Cloud"],
+    "min_experience": 2.0,
+    "max_experience": 6.0,
+    "education_requirement": "Master's or Bachelor's in CS / Data Science",
+    "location": "Remote",
+    "employment_type": "Full-time",
+    "deadline": "2026-12-31",
+    "status": "Active"
+  }
+]

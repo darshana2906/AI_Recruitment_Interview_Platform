@@ -1,28 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/client';
-import { Shield, Users, Briefcase, FileSpreadsheet, CheckCircle2, ShieldCheck, RefreshCw } from 'lucide-react';
+import { BulkResumeUpload } from './BulkResumeUpload';
+import { Shield, Users, Briefcase, FileSpreadsheet, CheckCircle2, ShieldCheck, RefreshCw, FileText, UserCheck } from 'lucide-react';
 
 export const AdminHome = () => {
   const { user } = useAuth();
   const [usersList, setUsersList] = useState([]);
-  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [candidatesList, setCandidatesList] = useState([]);
+  const [loadingData, setLoadingData] = useState(false);
   const [adminTestResult, setAdminTestResult] = useState(null);
 
-  const fetchUsers = async () => {
-    setLoadingUsers(true);
+  const fetchData = async () => {
+    setLoadingData(true);
     try {
-      const res = await api.get('/users/');
-      setUsersList(res.data);
+      const [usersRes, candidatesRes] = await Promise.all([
+        api.get('/users/'),
+        api.get('/candidates/'),
+      ]);
+      setUsersList(usersRes.data);
+      setCandidatesList(candidatesRes.data);
     } catch (err) {
-      console.error('Failed to load users:', err);
+      console.error('Failed to load admin data:', err);
     } finally {
-      setLoadingUsers(false);
+      setLoadingData(false);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchData();
   }, []);
 
   const testAdminAccess = async () => {
@@ -65,6 +71,91 @@ export const AdminHome = () => {
         </div>
       </div>
 
+      {/* Bulk Resume Upload Module (Requirement B) */}
+      <BulkResumeUpload
+        onBatchComplete={() => {
+          fetchData();
+        }}
+      />
+
+      {/* Candidate Profiles Extracted Database Table */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <div className="p-5 border-b border-slate-200 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <UserCheck className="w-5 h-5 text-purple-600" />
+            <div>
+              <h2 className="text-base font-bold text-slate-900">Extracted Candidate Profiles ({candidatesList.length})</h2>
+              <p className="text-xs text-slate-500">Structured candidate data parsed and stored in database</p>
+            </div>
+          </div>
+          <button
+            onClick={fetchData}
+            disabled={loadingData}
+            className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition border border-slate-200"
+            title="Refresh candidate data"
+          >
+            <RefreshCw className={`w-4 h-4 ${loadingData ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+
+        {candidatesList.length === 0 ? (
+          <div className="p-8 text-center text-slate-400 text-xs">
+            No candidates parsed yet. Upload resumes above to populate the candidate database.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-50 border-b border-slate-200 font-semibold text-slate-600 uppercase tracking-wider">
+                <tr>
+                  <th className="px-6 py-3">Candidate</th>
+                  <th className="px-6 py-3">Location</th>
+                  <th className="px-6 py-3">Experience</th>
+                  <th className="px-6 py-3">Education</th>
+                  <th className="px-6 py-3">Extracted Skills</th>
+                  <th className="px-6 py-3">Parsed At</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 text-slate-700">
+                {candidatesList.map((c) => (
+                  <tr key={c.id} className="hover:bg-slate-50/50 transition">
+                    <td className="px-6 py-3.5">
+                      <div className="font-semibold text-slate-900 text-sm">{c.full_name}</div>
+                      <div className="text-xs text-slate-500">{c.email}</div>
+                      {c.phone && <div className="text-[11px] text-slate-400">{c.phone}</div>}
+                    </td>
+                    <td className="px-6 py-3.5 text-slate-600">{c.location || 'N/A'}</td>
+                    <td className="px-6 py-3.5 font-semibold text-slate-800">
+                      {c.total_experience_years ? `${c.total_experience_years} years` : '0 years'}
+                    </td>
+                    <td className="px-6 py-3.5 text-slate-600">{c.education_level || 'N/A'}</td>
+                    <td className="px-6 py-3.5">
+                      <div className="flex flex-wrap gap-1 max-w-[280px]">
+                        {c.skills?.slice(0, 4).map((s, idx) => (
+                          <span
+                            key={idx}
+                            className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-md font-medium text-[10px]"
+                          >
+                            {s}
+                          </span>
+                        ))}
+                        {c.skills?.length > 4 && (
+                          <span className="text-[10px] text-slate-400 self-center font-semibold">
+                            +{c.skills.length - 4} more
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-3.5 text-slate-400 text-[11px]">
+                      {new Date(c.created_at).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
       {/* RBAC Verification Card */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
         <div className="flex items-center justify-between mb-3">
@@ -90,74 +181,6 @@ export const AdminHome = () => {
             <span className="font-bold">HTTP {adminTestResult.status} OK:</span> {adminTestResult.message} ({adminTestResult.detail})
           </div>
         )}
-      </div>
-
-      {/* User Management Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="p-5 border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-indigo-600" />
-            <div>
-              <h2 className="text-base font-bold text-slate-900">Registered Platform Users</h2>
-              <p className="text-xs text-slate-500">Live query from SQLite database (`users` table)</p>
-            </div>
-          </div>
-          <button
-            onClick={fetchUsers}
-            disabled={loadingUsers}
-            className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition border border-slate-200"
-            title="Refresh user list"
-          >
-            <RefreshCw className={`w-4 h-4 ${loadingUsers ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider">
-              <tr>
-                <th className="px-6 py-3">ID</th>
-                <th className="px-6 py-3">User</th>
-                <th className="px-6 py-3">Role</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Registered At</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200 text-slate-700">
-              {usersList.map((u) => (
-                <tr key={u.id} className="hover:bg-slate-50/50 transition">
-                  <td className="px-6 py-3.5 font-mono text-xs text-slate-500">#{u.id}</td>
-                  <td className="px-6 py-3.5">
-                    <div className="font-medium text-slate-900">{u.full_name}</div>
-                    <div className="text-xs text-slate-500">{u.email}</div>
-                  </td>
-                  <td className="px-6 py-3.5">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${
-                        u.role === 'admin'
-                          ? 'bg-purple-100 text-purple-800 border border-purple-200'
-                          : u.role === 'interviewer'
-                          ? 'bg-indigo-100 text-indigo-800 border border-indigo-200'
-                          : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                      }`}
-                    >
-                      {u.role}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3.5">
-                    <span className="inline-flex items-center gap-1 text-xs text-emerald-700 font-medium">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                      Active
-                    </span>
-                  </td>
-                  <td className="px-6 py-3.5 text-xs text-slate-500">
-                    {new Date(u.created_at).toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
   );

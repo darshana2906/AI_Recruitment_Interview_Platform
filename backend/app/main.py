@@ -7,7 +7,7 @@ from app.config import settings
 from app.database import engine, Base, SessionLocal
 from app.models.user import User, UserRole
 from app.core.security import hash_password
-from app.routers import auth_router, users_router
+from app.routers import auth_router, users_router, candidates_router
 
 # Setup logging
 logging.basicConfig(
@@ -93,6 +93,7 @@ app.add_middleware(
 # Include Routers
 app.include_router(auth_router, prefix="/api")
 app.include_router(users_router, prefix="/api")
+app.include_router(candidates_router, prefix="/api")
 
 
 @app.get("/", tags=["Root"])

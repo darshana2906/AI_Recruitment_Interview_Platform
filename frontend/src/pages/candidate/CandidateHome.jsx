@@ -1,12 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/client';
-import { FileText, ShieldCheck, ShieldAlert, CheckCircle, Clock, Upload, Search } from 'lucide-react';
+import { ResumeUpload } from './ResumeUpload';
+import { ProfileReview } from './ProfileReview';
+import { FileText, ShieldCheck, ShieldAlert, CheckCircle, Clock, Upload, Search, Briefcase } from 'lucide-react';
 
 export const CandidateHome = () => {
   const { user } = useAuth();
+  const [profile, setProfile] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
   const [testResult, setTestResult] = useState(null);
   const [testing, setTesting] = useState(false);
+
+  const fetchProfile = async () => {
+    try {
+      const res = await api.get('/candidates/me');
+      setProfile(res.data);
+    } catch {
+      // No profile uploaded yet
+      setProfile(null);
+    } finally {
+      setLoadingProfile(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   const testEndpoint = async (url, endpointName) => {
     setTesting(true);
@@ -45,13 +65,28 @@ export const CandidateHome = () => {
           </p>
         </div>
         <div className="bg-white/10 backdrop-blur-xs px-4 py-3 rounded-xl border border-white/20 text-xs">
-          <div className="text-emerald-200">Session Status</div>
+          <div className="text-emerald-200">Resume Status</div>
           <div className="font-semibold text-white flex items-center gap-1.5 mt-0.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
-            Active & Verified (Phase 1)
+            <span className={`w-2 h-2 rounded-full ${profile ? 'bg-emerald-300' : 'bg-amber-300 animate-pulse'}`}></span>
+            {profile ? 'Parsed & Verified' : 'Resume Required'}
           </div>
         </div>
       </div>
+
+      {/* Resume Upload Module */}
+      <ResumeUpload
+        onUploadSuccess={(updatedProfile) => {
+          setProfile(updatedProfile);
+        }}
+      />
+
+      {/* Profile Review and Correction Module (Requirement A) */}
+      {profile && (
+        <ProfileReview
+          initialProfile={profile}
+          onSaveSuccess={(updated) => setProfile(updated)}
+        />
+      )}
 
       {/* RBAC Verification Live Playground */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
@@ -67,22 +102,22 @@ export const CandidateHome = () => {
           <button
             onClick={() => testEndpoint('/users/profile', 'GET /api/users/profile')}
             disabled={testing}
-            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-semibold transition border border-slate-300 flex items-center gap-1.5"
+            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-semibold transition border border-slate-300 flex items-center gap-1.5 cursor-pointer"
           >
             <span>Test Candidate Profile (200 OK)</span>
           </button>
           <button
-            onClick={() => testEndpoint('/users/candidate-portal', 'GET /api/users/candidate-portal')}
+            onClick={() => testEndpoint('/candidates/me', 'GET /api/candidates/me')}
             disabled={testing}
-            className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-xl text-xs font-semibold transition border border-emerald-200 flex items-center gap-1.5"
+            className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-xl text-xs font-semibold transition border border-emerald-200 flex items-center gap-1.5 cursor-pointer"
           >
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Test Candidate Portal API (200 OK)</span>
+            <span>Test Candidate Extracted Data (200 OK)</span>
           </button>
           <button
             onClick={() => testEndpoint('/users/admin-only', 'GET /api/users/admin-only (Attempt Forbidden)')}
             disabled={testing}
-            className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-800 rounded-xl text-xs font-semibold transition border border-red-200 flex items-center gap-1.5"
+            className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-800 rounded-xl text-xs font-semibold transition border border-red-200 flex items-center gap-1.5 cursor-pointer"
           >
             <ShieldAlert className="w-3.5 h-3.5 text-red-600" />
             <span>Test Admin-Only API (Expect 403 Forbidden)</span>
@@ -117,48 +152,6 @@ export const CandidateHome = () => {
             </pre>
           </div>
         )}
-      </div>
-
-      {/* Phase 2 Feature Roadmap Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
-            <Upload className="w-5 h-5" />
-          </div>
-          <h3 className="font-semibold text-slate-800 text-sm">Resume Upload & AI Parsing</h3>
-          <p className="text-xs text-slate-500 mt-1">
-            Upload PDF/DOCX resumes for automated structured JSON information extraction using Google Gemini LLM.
-          </p>
-          <div className="mt-4 flex items-center gap-1.5 text-xs text-amber-600 font-medium">
-            <Clock className="w-3.5 h-3.5" /> Upcoming in Phase 2
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
-            <Search className="w-5 h-5" />
-          </div>
-          <h3 className="font-semibold text-slate-800 text-sm">Job Catalog & Applications</h3>
-          <p className="text-xs text-slate-500 mt-1">
-            Explore active openings, check matching prerequisites, and submit one-click applications.
-          </p>
-          <div className="mt-4 flex items-center gap-1.5 text-xs text-amber-600 font-medium">
-            <Clock className="w-3.5 h-3.5" /> Upcoming in Phase 2
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-3">
-            <CheckCircle className="w-5 h-5" />
-          </div>
-          <h3 className="font-semibold text-slate-800 text-sm">Interview Status & Tracking</h3>
-          <p className="text-xs text-slate-500 mt-1">
-            View scheduled interviews, interviewer details, and real-time application status updates.
-          </p>
-          <div className="mt-4 flex items-center gap-1.5 text-xs text-amber-600 font-medium">
-            <Clock className="w-3.5 h-3.5" /> Upcoming in Phase 4
-          </div>
-        </div>
       </div>
     </div>
   );
