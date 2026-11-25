@@ -275,6 +275,7 @@ tests/test_resume_processing.py::test_candidate_cannot_access_another_candidates
 - [5-Factor Hybrid Candidate Matching Methodology](docs/MATCHING_METHODOLOGY.md)
 - [AI Architecture & Technology Choices](docs/AI_ARCHITECTURE_CHOICES.md)
 - [7–10 Minute Demo Video Walkthrough Script](docs/DEMO_VIDEO_SCRIPT.md)
+- [Recorded Demonstration Video (MP4)](Video_Submission/Tier-2%20project%20video.mp4)
 - [Complete Postman Collection v2.1](docs/postman_collection.json)
 
 ---
